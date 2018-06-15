@@ -1,0 +1,347 @@
+
+                                   day 14  网络编程：UDP通信、TCP通信
+
+=========================================================================================================
+
+一、网络通信协议：三要素：通信协议、IP地址、端口号。
+
+      1.网络通信协议：位于同一个网络中的计算机在进行连接和通信时需要遵守一定的规则，这些连接和通信的规则被称为网络通信协议，
+            它对数据的传输格式、传输速率、传输步骤等做了统一规定，通信双方必须同时遵守才能完成数据交换。
+
+      2.TCP/IP协议：目前应用最广泛的是TCP/IP协议(Transmission Control Protocal/Internet Protocal传输控制协议/英特网互联协议)，
+            它是一个包括TCP协议和IP协议，UDP（User Datagram Protocal）协议和其它一些协议的协议组。
+        层次结构：           
+               应用层：主要负责应用程序的协议，例如HTTP协议、FTP协议等。如HTTP、FTP、DNS等；
+               传输层：主要使网络程序进行通信，在进行网络通信时，可以采用TCP协议，也可以采用UDP协议。如TCP、UDP。
+               网络层：网络层是整个TCP/IP协议的核心，它主要用于将传输的数据进行分组，将分组数据发送到目标计算机或者网络。如IP、ICMP、IGMP 。
+               链路层：链路层是用于定义物理传输通道，通常是对某些网络连接设备的驱动协议，例如针对光纤、网线提供的驱动。如驱动程序、接口。
+
+      3.IP地址：在计算机网络通信中，为了能够进行通信，唯一标识一台计算机的标识号称为IP地址。
+                广泛应用的是IPv4地址，是一个4字节的二进制数，为方便记忆处理，常写成十进制形式，
+                每个字节用一十进制数（0-255）表示，数字间用符号“.”分开，如 “192.168.1.100”。
+        注意：IP地址是网络通信中，互相访问的唯一指引；
+
+      4.端口号：计算机内通过端口号区分不同应用程序的。
+            （1） 通过IP地址可以连接到指定计算机，但如果想访问目标计算机中的某个应用程序，还需要指定端口号。
+            （2） 端口号用两个字节（16位的二进制数）表示，取值范围是0~65535，其中，0~1023之间的端口号用于一些知名的网络服务和应用，
+                  用户的普通应用程序需要使用1024以上的端口号，从而避免端口号被另外一个应用或服务所占用。 
+  
+
+
+二、InetAddress类
+
+      1.java.net.InetAddress   该类用于封装一个IP地址。常用方法如下：
+
+      2.常用方法：
+           静态方法：（类名调用）static InetAddress getLocalHost() 返回本地主机；
+                    static InetAddress getByName(String host)  根据主机名返回ip对象。参数可以是 ：域名、ip、主机名；
+            方法：
+                  String getHostName()   获取主机名
+                  String getHostAddress()  获取ip
+ 
+          前两个静态方法用于获取该类的实例对象：
+
+
+三、UDP通信协议
+ 
+      1.特点：UDP是无连接通信协议，即在数据传输时，数据的发送端和接收端不建立逻辑连接。
+              消耗资源小，通信效率高，常用于音频、视频和普通数据的传输；如qq聊天，视频会议；
+
+        缺点：由于面向无连接性，不能保证数据的完整性，传输重要数据时不使用UDP协议。
+
+      2.通信过程：类比“寄快递”或者“码头送货”；
+        寄快递： 物品（数据）---->打包成快递（DatagramPacket）----->快递公司（DatagramSocket）
+        ------->邮递出去；
+        收快递： 目的地快递公司---->接收快递----->打开快递，确认邮递物品
+
+      3.UDP发送端代码思路：
+  		java.net.DatagramSocket 用来表示UDP发送端
+       构造方法：
+  		DatagramSocket()  发送端
+       普通方法：
+      	       void send(DatagramPacket p) 发送数据包
+               java.net.DatagramPacket  发送端的数据包
+        
+       构造方法：
+       	       DatagramPacket(byte[] buf, int length, InetAddress address, int port) 
+      	参数
+       		byte[] buf：发送的数据
+       		int length：发送数据的长度
+       		InetAddress address:接收端的地址 
+       		int port：接收端的端口号
+          1.准备数据
+          2.创建DatagramPacket对象  封装数据 Ip 端口号
+          3.创建发送端对象DatagramSocket
+          4.调用发送端 send方法 发送数据包
+          5.关闭资源
+      
+
+      代码如下：
+               public static void main(String[] args) throws IOException {
+		//准备数据
+		byte[] bytes = "你好UDP".getBytes();
+		//创建DatagramPacket对象  封装数据 Ip 端口号
+		InetAddress address = InetAddress.getByName("127.0.0.1");
+		DatagramPacket dp = new DatagramPacket(bytes, bytes.length, address, 9999);
+		//创建发送端对象DatagramSocket
+		DatagramSocket ds = new DatagramSocket();
+		//调用发送端 send方法 发送数据包
+		ds.send(dp);
+		ds.close();
+
+
+      4. UDP接收端代码思路：
+  	  java.net.DatagramSocket 用来表示UDP接收端
+ 	     构造方法
+  		DatagramSocket(int port) 接收端
+  	    方法
+  		 void receive(DatagramPacket p) 接收数据包
+  
+  	   java.net.DatagramPacket  接收端的数据包
+  	        构造方法
+  		DatagramPacket(byte[] buf, int length) 用来接收数据包
+  
+            1.创建接收端对象  DatagramSocket
+            2.创建接收端数据包对象,用来接收数据包DatagramPacket
+            3.调用DatagramSocket的receive方法接收数据包
+            4.拆包：
+  		DatagramPacket的方法
+  		数据的长度
+  			 int getLength()  
+  		发送端IP
+  			InetAddress getAddress() 
+  		发送端端口
+  			 int getPort() 
+            5.关闭资源
+
+        代码如下：
+            public static void main(String[] args) throws IOException {
+		DatagramSocket ds = new DatagramSocket(9999);
+		byte[] bytes = new byte[1024*64];
+		DatagramPacket dp = new DatagramPacket(bytes,bytes.length);
+		ds.receive(dp);
+		int length = dp.getLength();//长度
+		InetAddress address = dp.getAddress(); //发送端地址
+		int port = dp.getPort();//发送端端口号
+		
+		System.out.println(address.toString()+":"+port+" "+new String(bytes,0,length));
+		
+		ds.close();
+
+
+四、TCP通信协议
+
+         
+      1.TCP协议：面向连接的通信协议，即在传输数据前先在发送端和接收端建立逻辑连接，然后再传输数据，
+                 它提供了两台计算机之间可靠无差错的数据传输。
+        在TCP连接中必须要明确客户端与服务器端，由客户端向服务端发出连接请求，每次连接的创建都需要经过“三次握手”。
+
+      2.通信特点：面向连接特性，它可以保证传输数据的安全性，所以是一个被广泛采用的协议，下载文件时必须采用TCP协议。
+
+      3.区别：
+            （1）UDP中只有发送端和接收端，不区分客户端与服务器端，计算机之间可以任意地发送数据。
+            （2）而TCP通信是严格区分客户端与服务器端的，在通信时，必须先由客户端去连接服务器端才能实现通信，
+                 服务器端不可以主动连接客户端，并且服务器端程序需要事先启动，等待客户端的连接。
+
+            （3）一个是ServerSocket类，用于表示服务器端，一个是Socket类，用于表示客户端。
+
+      4.TCP客户端
+         java.net.Socket  客户端
+        构造方法
+  	     Socket(InetAddress address, int port) 一旦创建客户端对象 就会和服务端进行连接
+  	     Socket(String host, int port) 
+        方法
+  	     OutputStream getOutputStream() 获取连接通路中的输出流对象
+  	     InputStream  getInputStream()  获取连接通路中的输入流对象
+             int getPort()                  该方法返回Socket对象与服务器端连接的端口号
+             InetAddress getLocalAddress()获取Socket对象绑定的本地IP地址，并将IP地址封装成InetAddress类型的对象返回
+             客户端给服务端发送数据    哥们 你好
+             服务端告知客户端接收到了数据  不好
+           在Socket类的常用方法中，getInputStream()和getOutStream()方法分别用于获取输入流和输出流。
+           当客户端和服务端建立连接后，数据是以IO流的形式进行交互的，从而实现通信。
+  
+        实现思路：
+             1.创建客户端对象
+             2.获取输出流对象  输出 哥们 你好
+             3.获取输入流对象 用来接收服务端发送的 不好
+             4.接收数据
+             5.关闭资源客户端
+
+      代码如下：
+              public static void main(String[] args) throws IOException{
+		Socket s = new Socket("127.0.0.1",6666);
+		OutputStream out = s.getOutputStream();
+		out.write("哥们，你好".getBytes());
+		System.out.println("---------接收服务端发送的数据-------------");
+		InputStream in = s.getInputStream();
+		byte[] bytes = new byte[1024];
+		int len = in.read(bytes);
+		System.out.println(new String(bytes,0,len));	
+		in.close();
+		out.close();
+		s.close();
+
+      5.TCP服务器端
+  
+      java.io.ServerSocket 
+        构造方法
+  		ServerSocket(int port) 服务器端对象绑定端口
+  	方法
+  		 Socket accept() 获取连接服务端的客户端对象
+        代码思路：
+               1.创建服务端对象
+               2.调用accept方法 获取客户端对象
+               3.根据客户端对象获取字节输入流 接收数据
+               4.根据客户端对象 获取字节输出流 返回数据
+               5.关闭资源          
+
+        代码如下：
+ 
+                 public static void main(String[] args) throws IOException {
+		//创建服务端对象
+		ServerSocket ss = new ServerSocket(6666);
+		//调用accept方法 获取客户端对象
+		Socket thisSocket = ss.accept();
+		
+		//根据客户端对象获取字节输入流 接收数据
+		InputStream in = thisSocket.getInputStream();
+		byte[] bytes = new byte[1024];
+		int len = in.read(bytes);
+		System.out.println(new String(bytes,0,len));
+		
+		System.out.println("---------给客户端发送数据----------");
+		//根据客户端对象 获取字节输出流 返回数据
+		OutputStream out = thisSocket.getOutputStream();
+		out.write("不好".getBytes());
+		
+		out.close();
+		in.close();
+		thisSocket.close();
+		ss.close();
+
+
+
+
+五、文件上传案例
+
+ 
+     文件上传客户端
+  
+                       数据源:d:\\1.jgp
+                       数据目的:服务端
+  
+                  1.创建客户端对象 绑定服务端的ip和端口
+                  2.创建FileInputStream对象 绑定数据源
+                  3.获取连接同路中字节输出流
+                  4.进行读写
+                  5.获取连接同路中字节输入流
+                  6.接收服务器返回的上传成功
+                  7.关闭资源
+
+       代码如下：
+
+                public static void main(String[] args) throws IOException, IOException {
+		1.创建客户端对象 绑定服务端的ip和端口
+		Socket s = new Socket("127.0.0.1",8888);
+		2.创建FileInputStream对象 绑定数据源
+		FileInputStream fis = new FileInputStream("d:\\1.jpg");
+	    3.获取连接同路中字节输出流
+		OutputStream out = s.getOutputStream();
+		4.进行读写
+		byte[] bytes = new byte[1024];
+		int len = 0;
+		while((len = fis.read(bytes))!=-1){
+			out.write(bytes, 0, len);
+		}
+		//告诉服务器 已经读写完毕 
+		s.shutdownOutput();//向服务端写了一个结束标记
+		
+		System.out.println("------------接收服务端返回的上传成功---------------");
+	    5.获取连接同路中字节输入流
+		InputStream in = s.getInputStream();
+	    6.接收服务器返回的上传成功
+		byte[] b = new byte[1024];
+		int length = in.read(b);
+		System.out.println(new String(b,0,length));
+	    7.关闭资源
+		in.close();
+		out.close();
+		fis.close();
+		s.close()
+   
+      文件上传服务端
+ 
+                    数据源:客户端
+                    数据目的:d:\\upload1\\1.jgp
+  
+                   1.创建服务端对象 绑定端口号
+                   2.获取发送数据的客户端对象
+                   3.通过客户端对象 获取字节输入流
+                   4.创建FileOutputStream对象
+                   5.进行读写
+                   6.通过客户端对象 获取字节输出流
+                   7.向客户端返回上传成功
+                   8.关闭资源
+
+            代码如下：
+                    public static void main(String[] args) throws IOException {
+		 1.创建服务端对象 绑定端口号
+		ServerSocket ss = new ServerSocket(8888);
+		 2.获取发送数据的客户端对象
+		Socket s = ss.accept();
+		 3.通过客户端对象 获取字节输入流
+		InputStream in = s.getInputStream();
+		公司的域名+当前时间毫秒值+随机数
+		String fileName = "itcast.cn"+System.currentTimeMillis()+new Random().nextInt(999999)+".jpg";
+		
+		 4.创建FileOutputStream对象
+		FileOutputStream fos = new FileOutputStream("d:"+File.separator+"upload1"+File.separator+fileName);
+		 5.进行读写
+		byte[] bytes = new byte[1024];
+		int len = 0;
+		while ((len = in.read(bytes)) != -1) {
+			fos.write(bytes, 0, len);
+		}
+		System.out.println("----------给客户端返回数据---------");
+		 6.通过客户端对象 获取字节输出流
+		OutputStream out = s.getOutputStream();
+		 7.向客户端返回上传成功
+		out.write("上传成功".getBytes());
+		 8.关闭资源
+		out.close();
+		fos.close();
+		in.close();
+		s.close();
+		ss.close();
+
+
+    文件上传案例多线程版本（服务器端）：
+
+
+      ServerSocket ss = new ServerSocket(4567);
+		while (true) {
+			final Socket socket = ss.accept();
+			new Thread() {
+				public void run() {
+					try {
+
+						final InputStream in = socket.getInputStream();
+						String s="itcast.cn"+System.currentTimeMillis()+new Random().nextInt(100001);
+						BufferedOutputStream bos = new BufferedOutputStream(
+								new FileOutputStream("F:"+File.separator+"today1"+File.separator+s+".itcast"));
+						byte[] by = new byte[1024];
+						int len = 0;
+						while ((len = in.read(by)) != -1) {
+							bos.write(by, 0, len);
+						}
+						OutputStream out = socket.getOutputStream();
+						out.write("上传成功！".getBytes());
+						out.close();
+						in.close();
+						bos.close();
+						socket.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();

@@ -1,0 +1,672 @@
+01.面向对象_static关键字_概念
+	class Student{
+		String name;
+		int age;
+		char sex;
+		String schoolName = "传智播客北京校区";
+		
+	}
+	main(){
+		Student stu1 = new Student();
+		Student stu2 = new Student();
+	}
+
+	==================================================
+	这时，为了节省存储空间，我们可以将schoolName定义为static的：
+	class Student{
+		....
+		static String schoolName = "传智播客北京校区";
+	}
+	
+02.面向对象_static关键字_使用位置_特点
+	位置：类，成员属性、构造方法、成员方法、局部变量
+	1.使用位置：
+		1).可以修饰"成员变量--静态变量"：
+		2).可以修饰"成员方法--静态方法"：
+		3).可以修饰"代码块--静态代码块"
+		例如：
+		class Student{
+			public static int num = 10;
+			poblic static void show(){
+				.....
+			}
+		}
+	2.访问方式：
+		1).通过"对象名"访问；
+		2).通过"类名"访问(常用--省事)
+		main(){
+			System.out.println(Student.num);
+			Student.show();
+		}
+	3.存储方式(静态变量\静态方法)：
+		1).当程序中第一次"使用这个类"的时候，会先加载此类中所有的"静态成员（属性、方法）"，在静态存储区分配空间。
+		2)."静态成员"是早于"对象"产生的。所以，可以通过"类名"直接访问。
+		
+	4.注意事项：
+		1)."静态成员"不能直接访问"非静态成员"，因为静态的先产生，此时非静态成员还没有被分配空间。
+		   "非静态成员"可以访问"静态"和"非静态"成员。
+		    class Student{
+			int num = 10;
+			public static void show(){
+				System.out.println(num);
+			}
+		   }
+		   main(){
+			  Student.show();
+		   }
+		2)."静态方法"中不能使用this,super关键字。
+
+
+03.面向对象_static关键字_static成员的访问方式
+	1).通过"对象名"访问
+	2).通过"类名"访问
+03_2.static在以后项目中的应用：
+	1).全局变量：所有模块共用的一些"变量"，我们可以单独定义一个类，将这些变量存储在这个类中，并修饰为static
+		class Const{
+			public static String comName = "传智播客北京校区";
+		}
+		//其它类使用公司名称时：
+		class Student{
+			String schoolName = Const.comName;
+		}
+		class Teacher{
+			String schoolName = Const.comName;
+		}
+	2).工具性方法：所有模块共用的一些"功能性方法"，例如：求数组的最大值，最小值，平均值，打印数组....
+		class ArrayTools{
+			public static void printArray(int[] arr){
+				...
+			}
+			public static void getMax(int[] arr){
+				...
+			}
+		}
+		//其它类使用：
+		class Demo{
+			public void show(){
+				int[] arr = {1,432,5,44,321,43,432,423};
+				System.out.println("最大值：" + ArrayTools.getMax(arr));
+			}
+		}
+04.面向对象_static关键字_静态代码块
+	1.代码块：定义在"类体中"，或者"方法中"的一段被一对{}包含的代码。
+	2.代码块的分类：
+		1).构造代码块：
+			class Student{
+				int a ;
+				{
+					a = 10;
+				}
+			}
+		   a).构造代码块在new对象时会被执行；
+		   b).如果同构造方法同时存在，先执行：构造代码块，后执行构造方法。
+		   c).作用：初始化成员。但没有"构造方法"好用，所以很少用。
+
+		2).静态代码块：
+			class Student{
+				static{
+					
+				}
+			}
+		   a).静态代码块只在第一次使用这个类的时候执行一次，之后不再被执行。
+		   b).如果同：构造方法、构造代码块同时存在，执行顺序：静态代码块、普通代码块、构造方法；
+		   c).作用：初始化静态成员变量。
+
+		3).局部代码块：
+			class Student{
+				public void show(){
+					int a = 10;
+					
+					{
+						大对象 bigObj = new 大对象();
+						...使用
+						//局部代码块
+						a = 20;
+					}
+					System.out.println(a);
+				}
+			}
+04_2.类成员的初始化过程：
+	题目一：
+		class Student{
+			//静态代码块
+			static{
+				System.out.println("a");
+			}
+			//构造代码块
+			{
+				System.out.println("b");
+			}
+			//构造方法
+			Student(){
+				System.out.println("c");
+			}
+		}
+		main(){
+			new Student();//打印：abc
+		}
+	题目二：
+		class Student{
+			static int a = 10;
+			static{
+				fun();
+			}
+			public static void fun(){
+				System.out.println(a);
+			}
+		}
+		main(){
+			Student.fun();//1010
+		}
+	题目三：
+		class Student{
+			static{
+				fun();
+			}
+			static int a = 10;//0  10
+			
+			public static void fun(){
+				System.out.println(a);
+			}
+		}
+		main(){
+			Student.fun();//010
+		}
+	
+	一个类初始化过程：
+	1).静态成员变量的默认初始化；
+	2).按照代码中"静态成员"的定义顺序，为静态成员变量显示初始化，为静态成员方法分配空间；
+	   如果有"静态代码块"，先执行静态代码块；
+	3).普通成员的默认初始化；
+	4).构造代码块
+	5).构造方法
+	题目四：
+		class Fu{
+			static{
+				System.out.println("a");
+			}
+			{
+				System.out.println("b");
+			}
+			Fu(){
+				System.out.println("c");
+			}
+		}
+		class Zi extends Fu{
+			static{
+				System.out.println("d");
+			}
+			{
+				System.out.println("e");
+			}
+			Zi(){
+				System.out.println("f");
+			}
+		}
+		main(){
+			new Zi();//adbcef
+		}
+	初始化过程：
+	1.父类静态；
+	2.子类静态；
+	3.父类普通-->父类构造方法结束
+	4.子类普通-->子类构造方法结束
+---------------------------------------------------------------
+05.面向对象_final关键字_概念
+	1).final:表示"最终的"。
+	2).可以修饰：
+		类：final class MyClass{}，表示"最终类"，表示：不能被继承。
+		成员方法：public final void show(){}，表示"最终方法"，意味着：不能被"重写"
+			  class Fu{
+				public final void study(){
+					//小学
+					//初中
+					//高中
+					//大学
+					//研究生
+				}
+				public void getMoney(){
+					//子类可以重写
+				}
+			  }
+			  class Zi extends Fu{
+				//重写study
+				public void study(){//错误--不能被重写，但可以被继承
+				}
+				//重写getMoney()
+				public void getMoney(){//OK的
+				}
+			  }
+
+		成员变量、局部变量：是"常量",表示变量拥有最终的值，不能被改变。
+				
+			class Student{
+				//1).成员变量：
+				public final String schoolName = "传智播客北京校区";
+				//2).局部变量
+				public void show(final int a ,String s,final double d){//局部位置--OK的
+					final int c = 10;//局部位置--OK的
+				}
+			}
+				
+			a).基本类型：表示其值不能被改变：
+				final int a = 10;
+				a = 20;//编译错误
+			b).引用类型：表示其地址不能被改变，但堆空间中的内容是可以被改变的。
+				final int[] arr = {1,2,3};
+				arr[0] = 100;//OK的
+				arr = {2,3,4};//错误
+	3).关于final变量的赋值：
+		class Student{
+			final int num;
+			//后期，只能在"构造代码"或者"构造方法"中为其赋值一次。
+
+			static final int a;
+			//后期，只能在"静态代码块"中为其赋值一次
+		}
+	4).final后期的应用：
+		1).之前我们定义的static变量被所有对象共享，但是不安全，任何对象都可能会去修改这个变量。
+		2).所以，final经常会和static共同修饰"全局变量"，表示为：全局常量：
+			class Const{
+				public static final String schoolName = "传智播客北京校区";//此变量只能用，不能改
+			}
+			
+06.面向对象_final关键字_使用位置_特点
+---------------------------------------------------------------
+07.面向对象_包_概念
+	1)."包"就是操作系统中的"文件夹"，作用就是对我们的class文件进行分类存储。同时也允许了我们有多个同名的类。
+
+	  
+08.面向对象_包_定义包
+	1).在类中定义包使用：
+		package aaa.bbb.ccc;
+	2).包的级别说明：
+		第一级：一般使用顶级域名com/cn
+		第二级：公司名
+		第三级：项目名/部门名/大的系统名
+		第四级：子项目/子模块/子系统名
+		....
+	3).package语句说明：
+		1).java文件可以没有package语句，表示默认包；
+		2).如果定义包，使用package语句，要求必须在这个java文档的第一行有效代码；
+		3).package语句在一个java文件中只能有一条；
+
+09.面向对象_包_怎样访问包下的类	
+	1).如果要使用其它包下的类，首先那个类必须被修饰为public。
+	2).使用其它包下的类的方式：
+		1).全名限定的类名(带包名的类名)
+		2).先导包，后使用；【常用】
+			import 一级包.二级包.三级包.类名;
+		   可以使用通配符：
+			import 一级包.二级包.三级包.*;//*只统配三级包下的所有类，不包含这个包下的其它子包下的其它类
+	3).import语句可以有多条；
+	   必须在package语句之后，在定义类之前；
+---------------------------------------------------------------
+09_2.final形参：
+	public void show(final int a , final int b){//a和b每次调用都会被赋一个实参，只是在方法内，a和b的值不能被更改。方法执行完毕，a和b的空间全部被清理。
+	}
+	main(){
+		show(10,20);
+	}
+09_3.父类静态方法子类能否被重写：
+	class Fu{
+		public static void show(){
+		}
+	}
+	class Zi extends Fu{
+		@Override //编译错误
+		public static void show(){
+		}
+	}
+	父类的静态方法，只能被继承，不能被重写。
+
+---------------------------------------------------------------
+10.面向对象_访问权限修饰符_四种访问权限修饰符的说明
+	一.从宽到窄：
+		1.public(公有):
+		2.protected(受保护):
+		3.(默认)：
+		4.private(私有):
+	
+
+11.面向对象_访问权限修饰符_使用位置_特点
+	一.类：
+		1.public : 表示公有的类，可以被包下的其它类访问；
+		2.(默认) : 表示默认访问基本，可以同包下其它的类访问。
+		例如：
+		package cn.itcast.demo01;
+		class Student{
+		}
+		------------------------------------------
+		package cn.itcast.demo01;
+		class Demo{
+			main(){
+				Student stu = new Student();//OK的
+			}
+		}
+		------------------------------------------
+		package cn.itcast.demo02;
+		import cn.itcast.demo01.Sudent;//编译错误
+		class Demo{
+			main(){
+				
+			}
+		}
+	二、类成员：
+		1.public:任何其它包下的其它类都可以被访问的成员。
+			package cn.itcast.demo01;
+			public class Student{
+				public String name;
+			}
+			package cn.itcast.demo02;
+			import cn.itcast.demo01.Student;
+			class Demo{
+				main(){
+					Student stu = new Student();
+					System.out.println(stu.name);
+				}
+			}
+
+		2.protected：只能被本包内的其它类访问；如果在包外，只能是在"子类"中被访问：
+			package cn.itcast.demo01;
+			public class Student{
+				protected String name = "刘德华";
+			}
+			----------------------------------
+			package cn.itcast.demo01;
+			public class Demo{
+				public static void main(String[] args){
+					Student stu = new Student();
+					System.out.println(stu.name);//OK的
+				}
+			}
+			-=========================================================
+			package cn.itcast.demo02;
+			import cn.itcast.demo01.Student;
+			public class Demo{
+				public static void main(String[] args){
+					Student stu = new Student();
+					System.out.println(stu.name);//错误，因为name是(默认级别)，在包外不能被访问
+				}
+			}
+			public class JavaStudent extends Student{
+				public void fn(){
+					System.out.println(name);//OK的
+				}
+			}
+		3.(默认)：只能被本包内的其它类访问。
+			package cn.itcast.demo01;
+			public class Student{
+				String name = "刘德华";
+			}
+			----------------------------------
+			package cn.itcast.demo01;
+			public class Demo{
+				public static void main(String[] args){
+					Student stu = new Student();
+					System.out.println(stu.name);//OK的
+				}
+			}
+			-=========================================================
+			package cn.itcast.demo02;
+			import cn.itcast.demo01.Student;
+			public class Demo{
+				public static void main(String[] args){
+					Student stu = new Student();
+					System.out.println(stu.name);//错误，因为name是(默认级别)，在包外不能被访问
+				}
+			}
+			public class JavaStudent extends Student{
+				public void fn(){
+					System.out.println(name);//错误，因为name是(默认级别)，在包外，即使是子类也不能被访问
+				}
+			}
+		4.private:私有，只能在本类内部被访问
+			package cn.itcast.demo01;
+			public class Student{
+				private int age = 20;
+				private void show(){
+					System.out.println(age);
+				}
+				public void fun(){
+					show();
+				}
+			}
+			------------------------------------
+			package cn.itcast.demo01;
+			class Demo{
+				public static void main(String[] args){
+					Student stu = new Student();
+					System.out.println(stu.age);//错误，不能直接访问私有成员
+					stu.show();//错误不能直接访问私有成员
+					stu.fun();
+				}
+			}
+			-------------------------------------
+			package cn.itcast.demo02;
+			import cn.itcast.demo01.Student;
+			class JavaStudent extends Student{
+				public void study(){
+					System.out.println(age);//错误，不能访问父类的私有成员
+				}
+			}
+
+---------------------------------------------------------------
+12.面向对象_各种修饰符总结
+	1.各种访问修饰符：
+		1).访问权限修饰符--四种；
+		2).static
+		3).final
+		4).abstract
+	2.类可以使用的修饰符：
+		1).访问权限修饰符：
+			a).public
+			b).(默认)
+		2).final类：表示"最终类"，不能被继承；
+		3).abstract类：表示"抽象类"，不能被实例化，只能用作父类。
+	3.成员属性使用的修饰符：
+		1).访问权限修饰符：四种都可以；
+		2).final属性：表示"拥有最终的值"，不能被修改；
+		3).static属性：表示"静态属性"；
+	4.构造方法使用的修饰符：
+		1).访问权限修饰符：四种都可以
+	5.成员方法：
+		1).访问权限修饰符：四种都可以；
+		2).final方法：表示不能被重写
+		3).static方法：表示"静态方法"，通过类名可以调用；
+		4).abstract方法：表示抽象方法，没有方法体，由子类来重写的。
+   注意：abstract修饰符不能和其它哪些修饰符共存：
+		1).private
+		2).static
+		3).final
+---------------------------------------------------------------
+13.面向对象_内部类_概念【了解】
+	1.在一个类内部可以定义：
+		1).成员属性：
+		2).构造方法：
+		3).成员方法：
+		4).类--这个定义在类内部的了就是：内部类
+	2.class 教室{
+		门号
+		宽度
+		长度
+		class 空调{//内部类，同门号，宽度，长度一样，都是"教室"类的成员
+			空调长度
+			空调宽度
+			空调功率
+
+			public void 开空调(){
+			}
+			public void 关空调(){
+			}
+		}
+		
+	　}
+	  
+14.面向对象_内部类_分类【了解】
+	1).成员内部类：
+		class Outer{
+			private int num = 10;
+			class Inner{
+				public void show(){
+					System.out.println("num = " + num);
+				}
+			}
+		}
+	   A).在外部创建内部类对象：一定要先创建外部类对象
+		Outer outer = new Outer();
+		Outer.Inner inner1 = outer.new Inner();
+		//或者写成一句话
+		Outer.Inner inner2 = new Outer().new Inner();
+		inner.show();
+	   B).覆盖：
+		class Outer{
+			int num = 10;
+			class Inner{
+				int num = 20;
+				public void show(){
+					int num = 30;
+					System.out.println(num);//30
+					System.out.println(this.num);//20
+					System.out.println(Outer.this.num);//10
+				}
+			}
+		}
+	2).局部内部类：
+15.面向对象_内部类_成员内部类【了解】
+	1).成员内部类：
+		class Outer{
+			private int num = 10;
+			class Inner{
+				public void show(){
+					System.out.println("num = " + num);
+				}
+			}
+		}
+	   A).在外部创建内部类对象：一定要先创建外部类对象
+		Outer outer = new Outer();
+		Outer.Inner inner1 = outer.new Inner();
+		//或者写成一句话
+		Outer.Inner inner2 = new Outer().new Inner();
+		inner.show();
+	   B).覆盖：
+		class Outer{
+			int num = 10;
+			class Inner{
+				int num = 20;
+				public void show(){
+					int num = 30;
+					System.out.println(num);//30
+					System.out.println(this.num);//20
+					System.out.println(Outer.this.num);//10
+				}
+			}
+		}
+16.面向对象_内部类_局部内部类【了解】
+	1.局部内部类是定义在某个方法或者代码块内部的内；
+	2.class Outer{
+		public void show(){
+			class Inner{
+				public void show(){
+					System.out.println("Inner.show()");
+				}
+			}
+		}
+	  }
+	3.局部内部类访问局部变量：
+	  class Outer{
+		int num = 20;
+		public void show(){
+			final int a = 10;//局部变量
+			class Inner{//局部内部类
+				public void show(){
+					System.out.println("Inner.show()");
+					System.out.println(num);//OK的
+					System.out.println(a);//错误
+				}
+			}
+			//注意：局部内部类访问局部变量，要求局部变量必须被修饰为final。
+		}
+	  }
+17.面向对象_内部类_局部内部类_匿名局部内部类
+	1.匿名局部内部类，是"局部内部类"的一种；
+	2.class Student{
+		public Inner show(){
+			class Inner{
+				public void fun(){
+					System.out.println("Inner-->show");
+				}
+			}
+
+			//有名字的局部内部类
+			Inner n = new Inner();
+			//匿名的局部内部类
+			n.fun();
+		}
+	  }
+	3.匿名局部内部类必须要基于：父类或者父接口
+	4.匿名局部内部类：
+		interface IA{
+			public void fun();
+		}
+		class Student{
+			public IA show(){
+				return new IA(){//匿名局部内部类，是IA的子类
+					public void fun(){
+						System.out.println("Inner-->show");
+					}
+				};
+				
+			}
+		  }
+	5.以后我们的使用：
+		interface IA{
+			public void show();
+		}
+		class Demo{
+			public static void main(String[] args){
+				print(new IA(){
+					public void show(){
+						System....
+					}
+				});
+			}
+			public static void print(IA a){
+				a.show();
+			}
+		}
+---------------------------------------------------------------
+=============================================================================
+学习目标总结：
+01.能够理解static关键字：
+	1).static表示"静态"的；
+	2).可以修饰：成员变量，成员方法；
+	3).静态成员，可以通过"对象"访问，也可以通过"类名"访问；
+	4).静态的变量被存储在静态存储区，而且只有一个存储空间，被多个对象共享。
+
+02.能够写出静态代码块的格式
+	class Student{
+		static{
+			System.out.println("静态代码块...");
+		}
+	}
+03.描述final修饰的类的特点
+	final修饰类：表示"最终类"，不能被继承
+04.描述final修饰的方法的特点
+	final修饰方法：表示"最终方法"，不能被重写
+05.说出内部类的概念
+	在一个类的内部再定义一个类，这个被定义在内部的类就是：内部类；
+06.写出导包关键字
+	import 包名.包名.包名.类名;
+	或者
+	import 包名.包名.包名.*;
+
+    import语句必须在package之后，class之前。可以有多条；
+07.能够说出权限修饰符作用范围
+	1).public : 可以修饰类，成员；被项目内的所有其它类访问；
+	2).protected:同包。包外，只有子类可以访问
+	3).默认：同包。
+	4).private:本类内部；
+
+08.能够说出包的作用
+	分类管理我们的class文件。

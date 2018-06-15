@@ -1,0 +1,244 @@
+﻿                                                    
+                                                      Day   09   Map集合
+===============================================================================================================================
+
+
+一、Map集合：
+         1.存储元素特点；
+         2.数据结构；
+         3.存储获取方法；
+ 
+二、两种遍历Map集合的方法：
+         1.“键找值”方式遍历Map集合；
+         2.“键值对”方式遍历Map集合；
+         3.能够使用HashMap存储自定义类型的键值对的数据；
+         都会使用增强for循环；
+
+三、可变参数：
+         1.什么情况需要可变参数；
+         2.可变参数的两个特点；
+
+四、Collections:集合工具类
+         1.shuffle()方法；
+         2.sort()方法；
+
+五.能够使用HashMap编写斗地主洗牌发牌案例：
+
+------------------------------------------------------------------------------------------------------------------
+
+
+一、Map集合：
+
+   （1） 相对于Collection中的集合元素，Map集合中存储的元素是成对存在的，每个元素由键和值两部分组成；
+         通过键可以找到对应的值；
+
+   （2） Collection中的集合称为单列集合，Map中的集合称为双列集合。
+
+   （3） 需要注意的是，Map中的集合不能包含重复的键，值可以重复；每个键只能对应一个值。
+
+   （4） Map中常用的集合为HashMap集合、LinkedHashMap集合。
+
+   （5） HashMap<K,V> 
+                      1.数据结构采用哈希表结构，元素存与取顺序不保证一致；
+                      2.要保证键的唯一、不重复；重写键的hashCode()方法、equals()方法；//alt+shift+s 松开  +H；
+
+         LinkedHashMap<K,V> :HashMap下的子类
+           
+                      1.数据结构采用哈希表结构+链表结构，通过链表结构保证元素的存储顺序一致；；
+                      2.通过哈希表结构保证键的唯一、不重复；重写键的hashCode()方法、equals()方法；
+
+
+
+   1.常用方法介绍：
+        
+          K:key 键   键是唯一的
+          V:vaule 值   值是可重复的
+
+          V put(K key ,V value) 将指定的键和值对应添加到集合 如果键相同，后面的值会覆盖掉前面的值
+	                        返回值一般情况都是null 如果出现覆盖情况 返回覆盖前的值
+          V get(Object key)  根据指定键（key）找到对应值（value）；
+
+          V remove(Object key) 根据指定的键（kay）删除键值对元素，返回值是被删除的值（value）。
+
+
+
+
+二、两种遍历Map集合的方法：
+ 
+         1.“键找值”方式遍历Map集合；
+
+            Set keySet() 将Map集合中的键存放到一个set集合中
+                * 1.创建Map对象
+                * 2.调用Map集合的keySet方法 获取所有键的Set集合
+                * 3.遍历set集合(set集合中存储的元素就是Map集合的键)
+                * 4. 依次获取每个元素(键)
+                * 5.调用Map的get(Object key) 通过键找到值
+
+         Map<Integer,String> map = new HashMap<Integer, String>();
+		
+		map.put(1, "柳岩");
+		map.put(2, "唐嫣");
+		map.put(3, "冠希");
+		map.put(4, "娇娇");
+		
+		//.调用Map集合的keySet方法 获取所有键的Set集合
+		Set<Integer> set = map.keySet();
+		
+		//获取set集合的迭代器
+		Iterator<Integer> it = set.iterator();
+		while(it.hasNext()){
+			int key = it.next();
+			//根据键找到值
+			String value = map.get(key);
+			System.out.println(key+" = "+value);
+		}
+		System.out.println("----------------------");
+		for(Integer key : set){
+			//根据键找到值
+			String value = map.get(key);
+			System.out.println(key+" = "+value);
+
+
+        
+         2.“键值对”方式遍历Map集合；
+
+             在Map类设计时，提供了一个嵌套接口：Entry。Entry将键值对的对应关系封装成了对象,即键值对对象。
+            这样我们在遍历Map集合时，就可以从每一个键值对（Entry）对象中获取对应的键与对应的值。
+           方法
+                 * Set<Entry> entrySet() 获取所有结婚证对象(Entry对象 键值对映射关系对象)的set集合
+                 * 
+                 * 1.创建Map集合对象
+                 * 2.entrySet()方法：用于返回Map集合中所有的键值对(Entry)对象，以Set集合形式返回。
+                 * 3.遍历包含键值对(Entry)对象的Set集合，得到每一个键值对(Entry)对象
+	         * 4.通过键值对(Entry)对象，获取Entry对象中的键与值。
+
+                 * 		getKey()方法：获取Entry对象中的键
+                 * 		getValue()方法：获取Entry对象中的值
+
+
+       Map<String,Integer> map = new HashMap<String, Integer>();
+		
+		map.put("柳岩", 38);
+		map.put("唐嫣", 18);
+		map.put("金莲", 1000);
+		map.put("大郎", 50);
+		//调用Map的entrySet方法 获取存储所有结婚证对象的set集合
+		Set<Entry<String, Integer>> set = map.entrySet();
+
+		//遍历set集合 迭代器
+		Iterator<Entry<String, Integer>> it = set.iterator();
+		while(it.hasNext()){
+			//遍历set集合 依次获取到每个结婚证
+			Entry<String, Integer> en = it.next();
+			//通过结婚证对象  获取到 夫(key) 妻(value)
+			String key  = en.getKey();
+			int value = en.getValue();
+			System.out.println(key + "=" + value);
+	
+		System.out.println("-------------------");
+		 for(Entry<String, Integer> en:set){
+			 String key = en.getKey();
+			 Integer value = en.getValue();
+			 System.out.println(key + "=" + value);
+
+
+         3.能够使用HashMap存储自定义类型的键值对的数据；自定义类型作为map集合的键
+
+                   通过hashCode和equals方法来保证元素的唯一
+ * 			先比较hashCode
+ * 				    不同   添加
+ * 				    相同  比较equals 
+ * 							相同  不添加
+ * 						           不同   添加
+注意：1.当给HashMap中存放自定义对象时，如果自定义对象作为key存在，这时要保证对象唯一，必须复写对象的hashCode和equals方法；
+        (如果忘记，请回顾HashSet存放自定义对象)。
+      2.如果要保证map中存放的key和取出的顺序一致，可以使用LinkedHashMap集合来存放。
+
+
+
+三、可变参数：
+         1.什么情况需要可变参数；
+             
+         * 方法的参数数据类型确定，但是个数不确定，这个时候可以使用可变参数；
+         可变参数格式：    
+         * 参数列表（ 数据类型...变量名）   修饰符 返回值类型 方法名(参数类型... 形参名){  }
+         2.可变参数的两个特点；
+                1.一个方法只能有一个可变参数
+                2.如果方法有多个参数 可变参数只能放到最后
+
+四、Collections:集合工具类
+         1.shuffle()方法；
+         2.sort()方法；
+
+          java.util.Collections
+             * static  void shuffle(List list) 打乱集合中元素的顺序 ；参数是List集合；
+             * static  void sort(List list)  按照自然顺序排序 ；参数是List集合；
+
+
+扩展内容：静态导入
+         抽象类等类中的静态方法和静态常量，可以通过导入方法；然后在main方法中直接使用；
+
+       import static java.lang.Math.abs;
+       import static java.lang.System.out;
+
+       import java.io.PrintStream;
+    public class Demo03_StaticImport {
+	public static final int a = 10;
+
+	public static void main(String[] args) {
+		System.out.println(Math.abs(-10));
+		System.out.println(abs(-12));
+		
+//		PrintStream out = System.out;
+//		out.println("abc");
+		out.println("abc");
+
+扩展内容：集合的嵌套使用
+
+        Map集合的嵌套
+ * List<Map<String,Integer>>
+ * Map<String,List<String>>
+ * Map<String,Map<String,String>>
+
+
+五.能够使用HashMap编写斗地主洗牌发牌案例：
+
+斗地主
+ * 
+ * 1.准备牌
+ * 		定义一个Map集合用来存储所有的扑克牌
+ * 		定义一个ArrayList集合用来存储所有的牌号
+ * 		通过花色和数组组合扑克牌
+ * 		将组合好的扑克牌添加到Map集合中
+ * 2.洗牌
+ * 		Collections.shuffle(存储牌号的List集合)
+ * 3.发牌
+ * 		索引%3发牌号
+ * 4.看牌
+ * 		根据牌号找到对应的牌
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

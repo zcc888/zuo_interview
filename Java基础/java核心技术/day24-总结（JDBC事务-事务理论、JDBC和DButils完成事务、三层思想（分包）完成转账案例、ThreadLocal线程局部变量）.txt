@@ -1,0 +1,472 @@
+
+              day 24 总结（JDBC事务-事务理论、JDBC和DButils完成事务、
+                     三层思想（分包）完成转账案例、ThreadLocal线程局部变量）
+
+   问题需求导入：
+                设计一个页面,输入三个值,一个是付款人,一个是收款人,一个是转账的金额.
+          不能出现付款人的钱被扣除而收款人没有收到钱的情况发生.而且要使用三层设计思想.
+
+======================================================================================================
+
+一、事务理论
+
+    1.理解事务的概念，说出事务的特性；
+
+二、JDBC和DButils完成事务
+
+    1.使用JDBC完成转账案例（存在的问题）；
+   
+    2.使用DButils完成转账案例程序编写（存在问题）；
+
+
+三、三层思想（分包）完成转账案例
+ 
+    1.理解分层思想及其优点；
+    2.实际开发过程实现其思想；
+    3.三层思想对应的常见分包，理解并掌握运用分包开发；
+ 
+四、事务管理：传递Connection（保证连接唯一性）
+
+
+五、提高：ThreadLocal线程局部变量
+
+    1.ThreadLocal的理解；
+    2.如何保证每个客户取到属于自己的连接；
+
+六、事务特性
+
+    1.事务的特性：ACUD
+
+    2.数据库的安全级别及对应的错误发生；
+    
+=====================================================================================================
+
+
+一、事务理论
+
+    1.理解事务的概念，说出事务的特性；
+
+      （1）事务：指的是逻辑上的一组操作(多条sql语句),组成这组操作的各个单元要么全都成功,要么全都失败.
+      
+      （2）事务作用：保证在一个事务中多次操作要么全都成功,要么全都失败.
+
+    2.事务的一般过程：
+
+       【1】开启事务：【2】提交事务；【3】回滚事务；
+
+        事务管理有两种方式:(MYSQL数据库事务默认是自动提交的.Oracle数据库事务默认是不自动提交.)
+        
+        MYSQL中两种方式进行事务的管理；
+       
+        （1）自动提交:Mysql默认形式。执行一条sql语句提交一次事务。
+            
+        （2）手动提交：先开启，后提交。
+            a.事务开启：start transaction；或者begin;
+            b.提交事务：commit；
+            c.回滚事务：rollback;
+
+     3.JDBC中的事务管理；
+
+       JDBC事务管理的API:Connection对象,（调用方法）负责事务的开启、提交或者回滚；
+ 
+            a. void setAutoCommit(boolean autoCommit) 将此连接的自动提交模式设置为给定状态（看做开启事务）；
+                    参数：为true，自动提交事务；为false，手动提交事务；
+            b. void commit() 提交事务（使上一次提交/回滚后进行的更改成为持久更改）
+            c. void rollback() 取消在当前事务中进行的所有更改；并释放此对象上持有的数据库锁；
+
+
+     4.DBUtils实现事务管理
+
+         【1】创建QueryRunner对象的不同构造方法区分两种事务模式；
+
+         （1） QueryRunner() 无参构造方法，没有传递连接，使用sql方法时需要给方法添加conn对象。手动提交事务时使用。
+   
+          调用方法：
+                   <T> T  query( Connection conn,String sql,ResultSetHandler<T> rsh,Object...params) 执行查询操作；
+
+                   int  update(Connection conn,String sql,Object param)   传入连接，完成 insert、update、delete操作；
+
+         （2） QueryRunner(DataSource ds) 此构造有传递连接，使用sql方法时无需添加conn对象。自动提交事务
+
+          调用方法：
+                   <T> T  query(String sql,ResultSetHandler<T> rsh,Object...params) 执行查询操作；
+
+                   int  update(String sql,Object param)   不需要传入连接，完成 inset、update、delete操作；
+
+         （3）DbUtils.commitAndClose()   提交并关闭连接；
+
+              DbUtils.rollbackAndClose()  回滚并关闭连接；
+
+二、JDBC和DButils完成事务
+
+    1.使用JDBC完成转账案例（存在的问题）；
+
+
+/*
+ * 使用原生态JDBC完成转账操作
+ * 
+ * 事务指的是逻辑上的一组操作,组成这组操作的各个单元要么全都成功,要么全都失败.
+ * 一组操作:只的是一个连接的下多个操作
+ * 事务作用：保证在一个事务中多次操作要么全都成功,要么全都失败.
+ * 事务的操作
+ * 	   开启事务：将事务开启  开启之后一直到提交 中所有的操作都看作是我当前的事务
+ * 	   提交事务：将操作的结果提交 永久保存数据库
+ * 	   回滚：返回事务开启前的初始状态
+ * Connection
+ * 		 void setAutoCommit(boolean autoCommit)  开启事务的方法
+ * 		参数
+ * 		boolean autoCommit：如果为true mysql开启事务 提交事务  针对的是一条语句 对于Mysql每条语句都是一个事务
+ * 							如果为false 则关闭mysql自动事务  开启手动事务
+ * 、	  void commit() 提交事务 将结果永久保存数据库
+ * 		  void rollback() 回滚 返回初始状态 
+ */
+
+               public static void main(String[] args) {
+		Connection con=null;
+		Statement stat=null;
+		try {
+			//获取连接对象；
+			con=JDBCUtils.getConnection();
+			//获取执行sql语句的对象Statement;
+			stat=con.createStatement();
+			//sql语句；
+			//执行sql,开启事务
+			con.setAutoCommit(false);
+			int i=stat.executeUpdate("update account set money=money-2000 where name='liuyan'");
+			
+			int j=stat.executeUpdate("update account set money=money+2000 where name='tangyan'");
+			if(i>0&&j>0){
+				System.out.println("转账成功！");
+			}
+			System.out.println(i);
+			System.out.println(j);
+			//提交事务；
+			con.commit();
+		} catch (Exception e) {
+			try {
+				//回滚；
+				con.rollback();
+			} catch (SQLException e1) {
+				throw new RuntimeException(e);
+			}
+			System.out.println(e);
+		}
+		finally{
+			JDBCUtils.close(con, stat);
+
+
+    2.使用DButils完成转账案例程序编写（存在问题）；
+
+
+三、三层思想（分包）完成转账案例
+ 
+    1.理解分层思想及其优点；
+
+           三层思想：高内聚、低耦合。
+           DAO：（data access object）数据访问层
+           Service:业务层
+           Web层：给用户看的
+
+     开发中，常使用分层思想 
+           不同的层次结构分配不同的解决过程，各个层次间组成严密的封闭系统
+           不同层级结构彼此平等
+     分层的目的是：
+              解耦
+              可维护性
+              可扩展性
+              可重用性
+     不同层次，使用不同的包表示
+          com.itheima    	公司域名倒写
+          com.itheima.dao	dao层
+          com.itheima.service	service层
+          com.itheima.domain	javabean
+          com.itheima.utils	工具
+          com.itheima.web       web层
+
+
+    2.实际开发过程实现其思想；
+
+    【步骤一】：导入JDBC相关的jar包和工具类.
+    【步骤二】：创建包结构.
+    【步骤三】：编写各层的类，实现功能转账功能Test-->Service-->DAO
+
+
+ 
+    3.三层思想对应的常见分包，理解并掌握运用分包开发；
+
+      web层（view层）              service层                       dao层                          ConnectionManager连接管理类（utils工具类）
+                             接收view层传递的数据  
+                          进行逻辑处理 将数据传递给DAO层
+      输入数据                    创建dao层对象        接收接收service层传递的数据，操作数据库；       获取连接，获取数据源
+      转账人、收钱人、金额        开启事务                                                                  开启事务
+      调用service层方法           调用转账方法            qr(DBUtils)获得连接，执行转账语句；               提交事务
+      显示结果                    调用收钱方法           qr(DBUtils)获得连接，执行收钱语句；                回滚事务
+                                  提交事务                                                              关闭连接并释放资源；
+                                  使劲处理try异常
+ 
+   一切的开始：分析问题，掌握需求，做准备；
+              1.导包（各种工具包：mysql驱动包、C3P0Utils包、DBUtils包、DBCPUtils包）
+              2.配置文件更改，数据库准备；
+              3.编写各部分程序；
+              4.做单元测试；
+              5.测试获得结果，验证程序，debug,修改优化程序，提高复用性和通用性和可维护性；
+
+ web层（view层）
+
+             public static void main(String[] args) {
+		String outName="liuyan";
+		String toName="tangyan";
+		double money=2500;
+		AccountService service=new AccountService();
+		service.transfer(outName, toName, money);
+ 
+
+ConnectionManager连接管理类（utils工具类）
+
+    获取连接
+ 
+   public class C3P0Utils {
+	private static ComboPooledDataSource dataSource = new ComboPooledDataSource();    
+
+        public static DataSource getDateSource(){
+		return dataSource;
+	}
+	public static Connection getConnection(){
+		try {
+			return dataSource.getConnection();
+		} catch (SQLException e) {
+			throw new RuntimeException("连接获取失败"+e);
+		}
+	}
+	public static void close(Connection con ,Statement stat,ResultSet rs){
+		try {
+			if(con!=null)
+			con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if(stat!=null)
+			stat.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if(rs!=null)
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+   
+事务的操作
+
+          private static ThreadLocal<Connection> tl=new ThreadLocal<Connection>();
+	//从tl中获取连接；
+	public static Connection getConnection(){
+		//从ThreadLocal中获取连接；
+		Connection con=tl.get();
+		if(con==null){
+			//第一次获取连接时，tl中没有连接；
+			//从连接池中获取连接
+			Connection conn=C3P0Utils.getConnection();
+			//将连接放入到tl中；
+			tl.set(conn);
+			return conn;
+		}
+		return con;
+	}
+	//开启事务
+	public static void begin(){
+		Connection con=getConnection();
+		try {
+			con.setAutoCommit(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	//提交事务
+	public static void commit(){
+		Connection con=getConnection();
+		try {
+			con.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	//回滚事务
+	public static void rollback(){
+		
+		try{
+			getConnection().rollback();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	//释放资源
+	public static void close(){
+		try {
+			//关闭资源
+			getConnection().close();
+			//将ThreadLocal中的连接也删除；
+			tl.remove();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+        
+service层 
+ 
+     
+            public void transfer(String outName, String toName, double money) {
+		//创建dao层
+		AccountDao dao=new AccountDao();
+		try {
+			//开启事务
+			ConnectionManager.begin();
+			//转出：
+			dao.outAccount(outName,money);
+			//转入；
+			System.out.println(1/0);
+			dao.toAccount(toName,money);
+			//提交事务
+			ConnectionManager.commit();
+			System.out.println("转账成功");
+		} catch (Exception e) {
+			//回滚；
+			ConnectionManager.rollback();
+			System.out.println("转账失败"+e);
+		}finally{
+			ConnectionManager.close();
+
+dao层 
+
+        public static void outAccount(String outName,double money) throws SQLException{
+		QueryRunner qr=new QueryRunner();
+		//获取连接:调用管理类中的连接
+		Connection con=ConnectionManager.getConnection();
+		//Connection con=C3P0Utils.getConnection();
+		String sql="update account set money=money-? where name=?";
+	
+		con.setAutoCommit(false);
+		qr.update(con,sql,money,outName);
+	}
+	public static void toAccount(String toName,double money ) throws SQLException{
+		//获取连接，
+		Connection con=ConnectionManager.getConnection();
+		//DButils工具类    注册驱动，并获得执行语句的对象
+		QueryRunner qr=new QueryRunner();
+		String sql="update account set money=money+? where name=?";
+		qr.update(con, sql, money,toName);
+
+
+四、事务管理：传递Connection（保证连接唯一性）
+
+      【】修改service和dao，service将connection传递给dao，dao不需要自己获得链接；
+
+service  层程序 
+ 
+       public void transfer(String outName,String toName,double money){
+		//创建dao层对象
+		AccountDao dao=new AccountDao();
+		
+		Connection con=C3P0Utils.getConnection();
+		try {
+			//开启事务；
+			con.setAutoCommit(false);
+			dao.outAccount(con, outName, money);
+			System.out.println(1/0);
+			dao.inAccount(con, toName, money);
+			//提交事务
+			con.commit();
+			System.out.println("转账成功");
+		} catch (Exception e) {
+			try {
+				//回滚；
+				con.rollback();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			System.out.println("转账失败！"+e);
+
+   dao层程序；
+
+              public void outAccount(Connection con,String outName,double money) throws SQLException{
+		QueryRunner qr=new QueryRunner();
+		
+		 con = C3P0Utils.getConnection();
+		String sql="update account set money=money-? where name=?";
+		
+		qr.update(con, sql, money, outName);
+             
+ 
+             public void inAccount(Connection con,String toName,double money) throws SQLException{
+		QueryRunner qr=new QueryRunner();
+		con=C3P0Utils.getConnection();
+		String sql="update account set money=money+? where name=?";
+		qr.update(con,sql,money,toName);
+
+
+五、提高：ThreadLocal线程局部变量
+
+    1.ThreadLocal的理解；
+
+      java.lang.ThreadLocal 该类提供了线程局部 (thread-local) 变量，用于在当前线程中共享数据。
+      ThreadLocal工具类底层就是一个Map，key存放的当前线程，value存放需要共享的数据。
+
+      结论：向ThreadLocal对象中添加的数据只能在当前线程下使用。
+
+
+/*
+ * java.lang.ThreadLocal<T>
+ *        可以理解为是一个Map集合，<Thread,T>
+ * 		  键：是而且只能是Thread.currentThread()；
+ *       值：T，可以是任意类型；
+ * 方法：
+ *     set(T t)添加元素；
+ *         类似map.put(Thread.currentThread(),t);
+ *     get() T t=map.get(Thread.currentThread());   
+ * Demo01_ThreadLocal  当前线程存储的数据，只能当前线程来获取，其他线程获取不到；
+ */
+
+
+ 
+    2.如何保证每个客户取到属于自己的连接；
+
+      C3P0Utils.getConnection() 内部使用ThreadLocal,用于本地线程缓存链接；
+
+        <1>.从ThreadLocal中获得链接；
+        <2>.如果没有，从连接池获得链接，并保存到ThreadLocal；
+        <3>.获得链接，返回即可；
+
+六、事务特性
+
+    1.事务的特性：ACID
+  
+        A 原子性(Atomicity)：强调事务的不可分割.多条语句要么都成功，要么都失败。
+        C 一致性(Consistency)：强调的是事务的执行的前后，数据要保持一致.
+        I 隔离性(Isolation)：一个事务的执行不应该受到其他事务的干扰.
+        D 持久性(Durability)：事务一旦结束(提交/回滚)数据就持久保持到了数据库.
+
+    不考虑隔离性，引发的安全性问题：
+
+    脏读	:一个事务读到另一个事务还没有提交的数据.
+    不可重复读	:一个事务读到了另一个事务已经提交的update的数据,导致在当前的事务中多次查询结果不一致.
+    虚读/幻读	:一个事务读到另一个事务已经提交的insert的数据,导致在当前的事务中多次的查询结果不一致.
+
+
+
+    2.数据库的安全级别及对应的错误发生；
+
+      解决事务隔离性引发的安全性问题的对策：
+
+          设置事务的隔离级别:
+          1 read uncommitted	:未提交读.脏读，不可重复读，虚读都可能发生.
+          2 read committed	:已提交读.避免脏读.但是不可重复读和虚读有可能发生.（Oracle默认）
+          4 repeatable read	:可重复读.避免脏读,不可重复读.但是虚读有可能发生.（MySql默认）
+          8 serializable	:串行化的.避免脏读，不可重复读，虚读的发生.
+
+          级别超高，越安全，效率越低。
+
+     mysql中：
+          查看当前的事务隔离级别：SELECT @@TX_ISOLATION;
+          更改当前的事务隔离级别：SET TRANSACTION ISOLATION LEVEL 四个级别之一。
+          设置隔离级别必须在事务之前

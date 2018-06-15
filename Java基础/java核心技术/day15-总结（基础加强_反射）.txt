@@ -1,0 +1,394 @@
+
+                                       day 15  基础加强  反射
+========================================================================================================
+
+一、反射的概念；
+    1.什么叫反射；
+    2.反射的作用；
+
+二、获取字节码文件对象三种方法：
+    1.创建类对象，调用:对象.getClass()方法获取Class对象；
+    2.Class类有一静态属性：类名.class;获取Class对象；
+    3.通过字符串获得：Class.forName("全限定类名")；[推荐使用，提高了代码通用性]。
+
+三、反射获取构造方法：
+
+    1.获取所有公共的构造方法、空参构造方法，并创建对象：
+    2.反射获取指定构造方法，并创建对象；
+    3.获取被private修饰的构造方法，指定构造方法，并创建对象；
+
+四、反射获取成员变量：
+    1.反射获取所有字段（成员变量），并为之赋值；
+    2.反射获取指定字段并为之赋值；
+    3.反射获取被private修饰的变量，并为之赋值；
+   
+五、反射获取方法：
+    1.反射获取所有所有方法，创建对象并执行方法；
+    2.反射获取指定方法，创建对象并执行方法；
+    3.反射获取被private修饰的方法，创建对象并执行方法；
+ 
+六、易混淆的知识点：
+  
+    1.创建（获得）Class对象的三种方法，第三种最常用、通用性高；
+    2.创建类对象的两种方法：
+          a.Class对象.newInstance()方法创建；
+          b.构造方法对象.newInstance()方法创建；
+    3.需要使用类对象的两种情况：
+          a.为字段（成员变量）赋值时，需指定为哪个类对象的变量赋值[set(obj,obj value)]；
+          b.成员方法执行时，需指定哪个类对象的方法执行：方法.invoke(obj,obj value);
+    4.需要调用setAccessible(true)方法接触语言检查的情况;
+      所有反射获取被private修饰的构造方法、字段（变量）、成员方法时：
+          a.使用被private修饰的构造方法创建类对象前；
+          b.使用被private修饰的字段（变量)进行赋值前；
+          c..使用被private修饰的成员方法调用执行前；
+
+      谁调用执行，谁使用setAccessible(true)方法。
+
+=========================================================================================================
+
+一、反射的概念；
+    1.什么叫反射；
+         在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，
+     都能够调用它的任意一个方法和属性；这种动态获取的信息以及动态调用对象的方法的功能称为java语言的反射机制。
+
+    2.反射的作用；
+        常使用与框架内，用于封装功能，简化代码，提高开发效率。
+
+	通过反射可以获取到一个类的构造方法，成员方法成员变量并运行；
+	反射将一个类的各个部分映射成相应的类。
+
+
+    3.知识储备：
+   Class类  Constructor 构造   Method 方法   Field 字段  instance 实例  invoke 执行
+
+    4.类的初始化
+                 1. 创建类的实例
+                 2. 类的静态变量，或者为静态变量赋值
+                 3. 类的静态方法
+                 4. 使用反射方式来强制创建某个类或接口对应的java.lang.Class对象
+                 5. 初始化某个类的子类
+                 6. 直接使用java.exe命令来运行某个主类
+
+二、获取字节码文件对象三种方法：
+
+    如果一个类具备 私有的成员变量  空参构造方法 get/set方法  toString 实现序列化接口  称之为JavaBean类
+
+
+    1.创建类对象，调用:对象.getClass()方法获取Class对象；
+             2 通过实例对象获得
+                   语法：变量.getClass()
+                   应用场景：在方法内部通过参数获得类型等
+                   Bean bean = newBean();
+                   Classclazz2 = bean.getClass();
+ 
+    2.Class类有一静态属性：类名.class;获取Class对象；
+
+       通过类型获得：
+           语法：类名.class
+           应用场景：确定类型等
+           Classclazz1 = Bean.class;
+
+    3.通过字符串获得：Class.forName("全限定类名")；[推荐使用，提高了代码通用性]。
+         通过字符串获得
+                  语法：Class.forName("全限定类名")
+                  应用场景：通过配置获得字符串等
+                  Classclazz3 = Class.forName("com.itheima_00_Bean.Bean");
+
+三、反射获取构造方法：
+
+    1.获取所有公共的构造方法、空参构造方法，并创建对象：
+
+       1.获取字节码文件对象
+       2.根据字节码文件对象  获取空参构造方法
+
+    Class类的方法
+    	Constructor[] getConstructors() 获取所有的公共的构造方法
+ 	Constructor   getConstructor()  获取指定的构造方法 空参数构造
+ 
+       3.运行构造方法
+  	     Constructor类
+  		  Object newInstance() 运行当前构造方法
+
+   Public Bean() {
+	System.out.println("无参构造");
+        }
+
+     Public Bean(String id, String className) {
+	this.id = id;
+	this.className = className;
+	System.out.print("有参构造：" + id);
+	System.out.println(" ，" + className);
+      }
+
+
+             Class c = Class.forName("cn.itcast.domain.Person");
+		
+		//获取所有公共的构造方法
+		Constructor[] cons = c.getConstructors();
+		for (Constructor con : cons) {
+			System.out.println(con);
+		}
+		Constructor con = cons[0];
+		//获取空参数构造方法
+		Constructor con = c.getConstructor();
+		
+		//运行空参数构造方法
+		Object obj = con.newInstance();//Person p = new Person();
+		System.out.println(obj);
+		
+		ArrayList a = new ArrayList();
+		System.out.println(a);
+
+
+    2.反射获取指定构造方法，并创建对象；
+
+        Class beanClass = Bean.class;
+     Constructor constructor = beanClass.getConstructor(String.class,String.class);
+        Object bean = constructor.newInstance("ArrayListId","java.util.ArrayList");
+	System.out.println(bean);
+
+    3.（暴力反射）获取被private修饰的构造方法，指定构造方法，并创建对象；
+          //1获得Class
+         Class beanClass = Bean.class;
+          // * getDeclaredConstructor()可以获得私有构造
+          Constructor constructor = beanClass.getDeclaredConstructor(String.class);
+          constructor.setAccessible(true);
+          //3 实例对象，两个字符串实参
+	Object bean = constructor.newInstance("userId");
+	System.out.println(bean);
+
+
+四、反射获取成员变量： 给成员赋值 获取成员变量的值 (理解)
+  
+        1.获取字节码文件对象
+        2.获取成员变量
+  	   Class类的方法
+  		Field[] getFields() 获取所有公共的成员变量
+  		Field getField(String name) 获取指定的成员变量 参数为变量名
+        3.给成员赋值 获取值
+  		Field类
+  	     void set(Object obj, Object value) 成员变量赋值
+  		参数 
+  			Object obj:给成员变量赋值需要对象支持 给哪个对象的成员变量赋值 
+  					       对象可以通过快捷方式创建
+   		Object value:要赋的值
+   	 Object get(Object obj) 获取对象上成员变量的值
+   	参数 
+   		Object obj：获取哪一个对象上成员变量的值
+ 
+ 
+        public class Demo01_Field {
+
+	public static void main(String[] args) throws Exception {
+		Class c = Class.forName("cn.itcast.domain.Person");
+		//获取所有公共的成员变量
+		Field[] fs = c.getFields();
+		for (Field f : fs) {
+			System.out.println(f);
+		}
+		Field f = c.getField("age");
+		System.out.println(f);
+		Person p = new Person();
+		f.set(p, 18);
+		System.out.println(p);
+		//给成员变量赋值
+		Object obj = c.newInstance();
+		f.set(obj, 20);
+		System.out.println(obj);
+		
+		//获取成员变量的值
+		Object age = f.get(obj);
+		System.out.println(age);
+
+
+五、反射获取方法：
+    1.反射获取所有所有方法，创建对象并执行方法；
+
+    2.反射获取指定方法，创建对象并执行方法；
+
+       反射获取成员方法并运行 获取age的get和set方法
+  
+         1.获取字节码文件对象
+         2.通过字节码文件对象 获取成员方法
+ 		Class类
+  			 Method[] getMethods() 获取所有公共的成员方法  包含继承的方法
+ 			 Method getMethod(String name, Class<?>... parameterTypes)
+  			 参数 
+ 			 String name:方法名
+ 			 Class... parameterTypes:方法的参数的数据类型 String String.class
+  								      如果方法没有参数则不写
+         3.运行成员方法
+  		Method类
+  		 Object invoke(Object obj, Object... args) 
+  		  参数 
+ 			Object obj:运行方法需要对象支持
+ 		    Object... args：运行方法需要的实际参数
+ 		返回值
+  		Object:方法如果有返回值则返回一个值 
+
+
+    3.反射获取被private修饰的方法，创建对象并执行方法；
+
+           反射私有的方法并运行
+  
+        (1).获取字节码文件对象
+        (2).获取私有方法
+ 		Class类的方法
+  		 Method[] getDeclaredMethods() 获取所有方法(不包含继承)
+  		 Method getDeclaredMethod(String name, Class<?>... parameterTypes) 获取指定方法 可以获取私有
+ 
+        (3).取消语言访问检查
+        (4).运行方法
+
+         public static void main(String[] args) throws Exception {
+		Class c = Class.forName("cn.itcast.domain.Person");
+		
+		Method[] ms = c.getDeclaredMethods();
+		for (Method method : ms) {
+			System.out.println(method);
+		}
+		//获取sleep方法
+		Method m = c.getDeclaredMethod("sleep", String.class);
+		//取消语言访问检查
+		m.setAccessible(true);
+		
+		m.invoke(c.newInstance(), "床上");
+
+   应用案例：向一个存储字符串的集合中 存储数字
+   Java中的泛型叫做伪泛型  只在编译器有效 编译成class文件加载进内存中后 泛型就不存在了
+
+           ArrayList<String> list = new ArrayList<String>();
+		
+		list.add("abc");
+		list.add(10);
+		//获取字节码文件对象
+		Class c = list.getClass();
+		//获取ArrayLst的add方法
+		Method m = c.getMethod("add", Object.class);
+		//反射运行方法
+		m.invoke(list, 1000);
+		m.invoke(list, true);
+		
+		System.out.println(list);
+
+
+
+六、反射的综合应用：
+
+
+     创建对象不确定
+  		需要通用的代码创建对象
+     调用的方法不确定
+  		需要通同代码来调用方法
+
+              创建Properties对象
+		Properties p = new Properties();
+		FileReader fr = new FileReader("config.properties");
+		p.load(fr);
+		System.out.println(p);
+		
+		
+		String className = p.getProperty("className");
+		String methodName =p.getProperty("methodName");
+		
+		//反射获取字节码文件对象
+		Class c = Class.forName(className);
+		//快捷方式创建对象
+		Object obj = c.newInstance();
+		
+		//获取方法
+		Method m = c.getMethod(methodName);
+		
+		//运行方法
+		m.invoke(obj);
+
+
+============================================================================
+
+
+七、综合案例：读取配置文件中的内容，反射set方法为成员变量赋值。
+
+            public static void main(String[] args) throws Exception {
+		//创建Propertie集合对象
+		Properties  p = new Properties();
+		FileReader fr = new FileReader("user.properties");
+		//将配置文件中的内容加载进集合
+		p.load(fr);
+		System.out.println(p);
+		
+		//获取字节码文件对象
+		Class c = Class.forName("cn.itcast.domain.User");
+		//快捷方式创建对象
+		Object obj = c.newInstance();
+		
+		//获取方法名
+		//获取Propertie集合中所有键的集合
+		Set<String> keys = p.stringPropertyNames();
+		//获取每一个成员变量的字符串
+		for (String key : keys) {
+			//拼接方法名
+			String methodName = "set"+key.substring(0, 1).toUpperCase()+key.substring(1);
+			System.out.println(methodName);
+			//获取方法
+			Method m = c.getMethod(methodName, String.class);
+			//运行方法
+			m.invoke(obj, p.getProperty(key));
+		}
+		
+		System.out.println(obj);
+		
+
+==========================================================================================================
+
+
+	反射获取构造方法
+		 Class类中方法
+ 			Constructor<?>[] getConstructors()  返回当前字节码文件对象的所有public修饰的构造方法
+ 			Constructor<T> getConstructor(Class<?>... parameterTypes) 返回指定了参数的构造方法 
+			参数
+				Constructor 用来描述构造方法的类  返回回来的就是Constructor的对象
+ 				Class<?>... parameterTypes 可变参数  是构造方法参数类型 如果参数不写 则返回空参构造方法
+		Constructor
+			 T newInstance(Object... initargs)  运行构造方法创建对象 
+							    返回值T 是泛型 没有泛型就是Object类型
+							    参数 为构造方法要使用的实际参数  参数不写则运行的是空参构造方法
+		
+		1.获取字节码文件对象
+		2.通过字节码文件对象获取构造方法对象
+		3.通过构造方法对象调用方法运行构造方法
+
+	反射获取对象的快捷方式
+		Class类的方法
+			 T newInstance()  创建此 Class 对象所表示的类的一个新实例。
+			 前提 必须有空参构造  空参构造必须public修饰
+		1.获取字节码文件对象
+		2.通过字节码文件直接调用newInstance创建对象
+
+	反射获取成员变量(因为成员变量都是私有的，所以用的很少)(了解)
+		Class类中方法
+			 Field getField(String name)   返回指定变量名的成员变量
+			 Field[] getFields()  返回所有public修饰的成员变量
+		Field类中的方法
+			 void set(Object obj, Object value) 为指定对象的成员变量赋值  obj为要赋值的对象 value为要赋的值
+		1.获取字节码文件对象
+		2.通过字节码文件对象获取字段对象
+		3.调用set方法为字段赋值 注意 需要给定一个对象 可以通过快捷方式反射创建
+
+	反射获取成员方法
+		Class类中方法
+			 Method[] getMethods()  获取所有公共方法
+			 Method getMethod(String name, Class<?>... parameterTypes)  获取指定方法名的公共方法
+	                                  name 方法名
+			                  Class<?>... parameterTypes 可变参 方法需要的参数类型 如果不写为空参方法
+		Method类中方法	
+			 Object invoke(Object obj, Object... args)   对带有指定参数的指定对象调用由此 Method 所表示的方法
+								     obj 要运行哪个对象的方法
+								     args 方法的实际参数
+		1.获取字节码文件对象
+		2.通过字节码文件对象获取方法对象
+		3.调用invoke方法运行当前方法 注意 需要给定一个对象 可以通过快捷方式反射创建
+		
+	暴力反射作为了解内容
+	加载配置文件的方式需要多做练
+
+

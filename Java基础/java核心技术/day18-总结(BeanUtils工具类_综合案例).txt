@@ -1,0 +1,384 @@
+
+                                   day 18  BeanUtils工具类_综合案例
+
+=================================================================================================================
+
+一、BeanUtils工具类
+
+    1.说出BeanUtils的作用；
+    2.熟练运用BeanUtils的三个静态方法进行封装与获取数据；
+    利用BeanUtils类编写XML综合案例；
+
+二、拓展内容
+
+    1.单例模式
+    2.装饰模式
+    3.死锁模式
+
+================================================================================================================
+
+
+一、BeanUtils工具类
+
+    1.说出BeanUtils的作用；
+
+       （1） BeanUtils 是 Apache commons组件的成员之一，主要用于简化JavaBean封装数据的操作。
+             它可以给JavaBean封装一个字符串数据，也可以将一个表单提交的所有数据封装到JavaBean中。
+       （2） BeanUtils工具常用工具类有两个：BeanUtils、ConvertUtils。BeanUtils用于封装数据，ConvertUtils用于处理类型转换。
+
+       （3） BeanUtils对象	
+              a). Objcet  populate(Object bean, Map<String,String[]> properties)   
+                          将Map数据封装到指定Javabean中，一般用于将表单的所有数据封装到javabean。
+	      b). setProperty(Object obj,String name,Object value)  设置属性值
+	      c).String   getProperty(Object obj,String name)  获得属性值
+
+       （4）作用：
+      
+                 功能1：设置属性；
+                 功能2：获得属性
+                 功能3：封装表单数据，使用Map 模拟 request.getParameterMap()
+                 功能4：编写工具类
+
+
+    2.熟练运用BeanUtils的三个静态方法进行封装与获取数据；
+
+        <A-->  setProperty(Object obj,String name,Object value)   给成员变量赋值
+	  参数 
+	 	   Object obj:被赋值的对象
+	  	   String name:成员变量的名字
+	  	   Object value:要赋的值
+	 
+	@Test
+	public void method() throws Exception{
+		Class c = Class.forName("cn.itcast.bean.User");
+		Object obj = c.newInstance();
+		BeanUtils.setProperty(obj, "id", "38250");
+		BeanUtils.setProperty(obj, "username", "liuyan");
+		BeanUtils.setProperty(obj, "password", "12345");
+		System.out.println(obj);
+		
+        <B-->  String getProperty(Object obj,String name) 获取成员变量的值
+	  参数 
+	  	Object obj:要获取哪个对象的属性值
+	        String name:成员变量的名字
+	 
+	@Test
+	public void method_2() throws Exception{
+		Class c = Class.forName("cn.itcast.bean.User");
+		Object obj = c.newInstance();
+		BeanUtils.setProperty(obj, "id", "38250");
+		BeanUtils.setProperty(obj, "username", "liuyan");
+		BeanUtils.setProperty(obj, "password", "12345");
+		
+		String id = BeanUtils.getProperty(obj, "id");
+		String username = BeanUtils.getProperty(obj, "username");
+		String password = BeanUtils.getProperty(obj, "password");
+		System.out.println(id);
+		System.out.println(username);
+		System.out.println(password);
+
+        <C-->  populate(Object obj ,Map<String,String[]> map) 将map中的数据 封装进对象中
+	  参数
+	  	  Object obj：被封装数据的对象
+	  	  Map<String,String[]> map:键是属性名  
+	                                   值是一个String数组 给new String[]{属性值}
+	  String[] s = new String[10];
+	  String[] s = {}
+	  String[] s = new String[]{"",""};
+	 
+	@Test
+	public void method_4() throws IllegalAccessException, InvocationTargetException, ClassNotFoundException, InstantiationException{
+		Map<String,String[]> map = new HashMap<String,String[]>();
+		
+		map.put("id", new String[]{"001"});
+		map.put("username", new String[]{"小乔"});
+		map.put("password", new String[]{"123456"});
+		map.put("hobbies", new String[]{"java","game"});
+		
+		Class c = Class.forName("cn.itcast.bean.User");
+		Object obj = c.newInstance();
+		
+		
+		BeanUtils.populate(obj, map);
+		System.out.println(obj);
+
+
+       练习：
+            读取user.properties配置文件
+	    将文件中的键值对获取出来
+	    将数据 封装到一个User对象当中
+	 
+	@Test
+	public void method_3() throws Exception{
+		//创建Properties对象
+		Properties p = new Properties();
+		FileReader fr = new FileReader("user.properties");
+		p.load(fr);
+		System.out.println(p);
+		//获取User的字节码文件对象
+		Class c = Class.forName(p.getProperty("className"));
+		//快捷方式创建对象
+		Object obj = c.newInstance();
+		
+		//获取Properties集合的所有的键集
+		 Set<String> keys =p.stringPropertyNames();
+		 for (String key : keys) {
+			System.out.println(key);
+			if(!key.equals("className")){
+				//为obj的成员变量赋值
+				BeanUtils.setProperty(obj, key, p.getProperty(key));
+			}
+		}
+		 
+		 System.out.println(obj);
+
+
+    3.利用BeanUtils类编写XML综合案例；
+
+      案例需求：读取XML中的配置文件信息,使用BeanUtils工具类创建JavaBean对象,将XML中的数据保存到JavaBean类的属性中。
+           
+        <?xml version="1.0" encoding="UTF-8"?>
+        <beans>
+	      <bean className="cn.itcast.bean.User">
+	            <property name="username" value="rose"></property>
+	            <property name="password" value="46964"></property>
+	      </bean>
+	      <bean className="cn.itcast.bean.Student">
+	            <property name="name" value="wuxiubo"></property>
+	            <property name="age" value="46"></property>
+	      </bean>
+        </beans>
+
+
+
+
+
+                @Test
+	public void demo01()throws Exception{
+		SAXReader sax = new SAXReader();
+		//读取XML文档,获取Document对象
+		Document document = sax.read("bean.xml");
+		//获取根标签 beans
+		Element element = document.getRootElement();
+		//获取beans根标签下的子标签 <bean>
+		List<Element> beanElement = element.elements();
+		//遍历集合,获取集合中的bean标签
+		for(Element beanEle : beanElement){
+			//获取bean标签中的属性className的属性值
+			String className = beanEle.attributeValue("className");
+			Class clazz = Class.forName(className);
+			Object obj = clazz.newInstance();
+			//获取bean标签子标签property
+			List<Element> proElement = beanEle.elements();
+			//遍历集合,获取出子标签
+			for(Element proEle : proElement){
+				//获取子标签的属性name,value的值
+				String name = proEle.attributeValue("name");
+				String value = proEle.attributeValue("value");
+				BeanUtils.setProperty(obj, name, value);
+			}
+			System.out.println(obj);
+
+     4.利用BeanUtils类编写注解综合案例：
+
+               @MyAnnotation(className="cn.itcast.bean.User",name="username,password",value="liuyan,123")
+	public void method(){ }
+	
+	@Test
+	public void test() throws Exception{
+		//获取Test02的所有字节码文件对象
+		Class c = Test02.class;
+		Method[] methods = c.getMethods();
+		for (Method method : methods) {
+			//判断哪个方法上有@MyAnnotation 这个注解
+			boolean b = method.isAnnotationPresent(MyAnnotation.class);
+			if(b){
+				MyAnnotation my = method.getAnnotation(MyAnnotation.class);
+				//获取属性
+				String className = my.className();
+				//根据className属性值 创建字节码文件对象
+				Class clazz = Class.forName(className);
+				Object obj = clazz.newInstance();
+				System.out.println(obj);
+				String name = my.name();    //静态方法获取注解上的属性；
+				String value = my.value();
+				
+				BeanUtils.setProperty(obj, name.split(",")[0], value.split(",")[0]);
+				BeanUtils.setProperty(obj, name.split(",")[1], value.split(",")[1]);
+				System.out.println(obj);
+
+
+
+二、拓展内容
+
+    1.单例设计模式：
+                   设计模式:前人遇到问题总结出来的经验
+       单例设计模式
+       永远保证一个类只有一个对象
+         1.私有构造方法
+         2.成员位置创建一个对象
+         3.提供一个静态的公共方法来获取对象
+
+     public class Test {
+
+	public static void main(String[] args) {
+		for (int i = 0; i < 50; i++) {
+			Single s = Single.getSingle();
+			System.out.println(s);
+                 
+
+     单例设计模式之饿汉式
+ 
+      public class Single {
+
+	private static Single s = new Single();
+	
+	private Single(){
+		
+	}
+	
+	public static  Single getSingle(){
+		return s;
+	}
+
+
+     单例设计模式之懒汉式  延迟加载：只有调用时才创建唯一对象，不调用不创建不占用资源；
+     隐患：当多个线程调用时，会出现线程安全问题；
+
+                public class Single {
+
+	private static Single s;//0x1111
+	private Single(){
+		
+	}
+	public static  Single getSingle(){
+		
+		if(s == null){
+			
+			synchronized (Single.class) {
+				if(s == null){
+					
+					s = new Single();//0x1111
+				}
+			}
+		}
+		return s;
+
+     解决思路：同步代码块（加把锁）
+
+
+
+
+    2.装饰设计模式
+    可以解决  本身功能不变，但本来功能基础上添加额外的功能。
+    
+  手机                                       
+    打电话         
+    发短信
+    
+    
+ 
+  public class Test {
+
+	public static void main(String[] args) throws FileNotFoundException {
+		Phone phone = new Phone();
+		phone.call();
+		System.out.println("-----------");
+		
+		Phone p = new Phone();
+		ColoringPhone cp = new ColoringPhone(p);
+		cp.call();
+		
+	
+
+       手机类： 
+     public class Phone {
+
+	
+	public void call(){
+		System.out.println("打电话");
+	}
+	
+	public void send(){
+		System.out.println("发短信");
+	}
+
+
+       手机彩铃功能：
+        public class ColoringPhone {
+
+	private Phone phone;
+	
+	public ColoringPhone(Phone phone){
+		this.phone = phone;
+	}
+	
+	public void call(){
+		System.out.println("听彩铃了");
+		phone.call();
+	}
+
+
+    3.死锁模式：
+
+     A锁：
+            public class LockA {
+	
+	public static final LockA locka = new LockA();
+
+	private LockA(){
+		
+
+     B锁：
+         public class LockB {
+
+	public static final LockB lockb = new LockB();
+	
+	private LockB(){}  
+
+
+    调用两种锁：
+
+               public class DeadLock implements Runnable{
+
+	int i = 0;
+	@Override
+	public void run() {
+		while(true){
+			if(i%2==0){
+				//先A 后B
+				synchronized (LockA.locka) {
+					System.out.println("if...A");
+					synchronized (LockB.lockb) {
+						System.out.println("if...B");
+					}
+				}
+				
+			}else{
+				//先B后A
+				synchronized (LockB.lockb) {
+					System.out.println("else...B");
+					synchronized (LockA.locka) {
+						System.out.println("else...A");
+					}
+				}
+			}
+			
+			i++;
+		}
+	}
+
+
+        测试：
+             public class Test {
+
+	public static void main(String[] args) {
+		DeadLock dl = new DeadLock();
+		
+		
+		Thread t1 = new Thread(dl);
+		Thread t2 = new Thread(dl);
+		
+		t1.start();
+		t2.start();
+		

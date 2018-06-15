@@ -1,0 +1,258 @@
+
+                                day 19   sql语句   单表操作
+
+========================================================================================
+
+一、MySQL数据库安装及常见问题
+    1.会安装配置MySQL数据库；
+    2.dos命令窗口登录、启动数据库；
+    3.修改用户密码；
+
+二、数据库的常见操作（创建、查看、删除）、
+
+    1.常见操作的语句；
+
+三、表格的常用操作；
+    1.删除、查看结构、查看表；
+    2.修改结构、添加列、删除列；
+    3.修改和删除列的约束；
+
+四、字段的操作；
+    1.添加表数据；
+    2.修改表数据；
+    3.删除表数据；
+    4.查看表数据；
+
+五、约束的设置与删除；
+    1.主键约束；
+    2.非空约束；
+    3.唯一约束；
+    4.删除约束；
+
+===================================================================================
+
+一、MySQL数据库安装及常见问题
+
+    概念解读：
+      （1）数据库：数据库就是存储数据的仓库，其本质是一个文件系统，数据按照特定的格式将数据存储起来，
+           用户可以对数据库中的数据进行增加，修改，删除及查询操作。
+      （2）数据库管理系统（DataBase Management System，DBMS）：
+           指一种操作和管理数据库的大型软件，用于建立、使用和维护数据库，对数据库进行统一管理和控制，
+           以保证数据库的安全性和完整性。用户通过数据库管理系统访问数据库中表内的数据。
+
+      （3） 数据库表的理解：
+                            包---------数据库
+                            类---------表
+                      类中属性---------表中字段
+                          对象---------记录
+           表中的一行一行的信息我们称之为记录。
+
+           常用数据库：MYSQL，Oracle。
+
+    1.会安装配置MySQL数据库；
+      （1）开启和关闭服务的操作：右键点击我的电脑→管理→服务→可以找到MySQL服务开启或停止。
+       或者：在DOS窗口，通过命令完成MySQL服务的启动和停止（必须以管理运行cmd命令窗口）。    
+              net start mysql        net stop mysql
+
+    2.dos命令窗口登录、启动数据库；
+       
+      （1）MySQL需要密码登录使用，使用默认的root账号及设置的密码；
+           格式1：cmd>  mysql –u用户名–p密码
+           例如：mysql -uroot –proot
+           
+           格式2：cmd>  mysql --host=ip地址--user=用户名 --password=密码
+           例如：mysql --host=127.0.0.1 --user=root --password=root
+	   Mysql –h 127.0.0.1 –uroot -proot
+
+           获取IP地址：ipconfig   
+
+    3.MySQL数据库密码重置；
+        （1）停止mysql服务器，运行输入services.msc 停止mysql服务；
+        （2）在cmd下，输入mysqld --console --skip-grant-tables启动服务器，出现以下页面，不要关闭该窗口；
+        （3）新打开cmd,输入mysql -uroot(不要密码)   
+                              use mysql;
+                              update user set password=password('abc')where User=“root”
+        （4）关闭两窗口；
+
+二、数据库的常见操作（创建、查看、删除）
+
+    结构化查询语言(Structured Query Language)简称SQL，是关系型数据库管理系统都需要遵循的规范。   
+          
+    （1）数据定义语言：简称DDL(Data Definition Language)，用来定义数据库对象：数据库，表，列等。关键字：create，alter，drop等。
+    （2）数据操作语言：简称DML(Data Manipulation Language)，用来对数据库中表的记录进行更新。关键字：insert，delete，update等。
+    （3）数据控制语言：简称DCL(Data Control Language)，用来定义数据库的访问权限和安全级别，及创建用户。
+    （4）数据查询语言：简称DQL(Data Query Language)，用来查询数据库中表的记录。关键字：select，from，where等
+      
+    规则：
+         QL语句可以单行或多行书写，以分号结尾
+         可使用空格和缩进来增强语句的可读性
+         MySQL数据库的SQL语句不区分大小写，关键字建议使用大写
+         同样可以使用/**/的方式完成注释  --  # 
+
+    1.常见操作的语句；
+        （1）  创建数据库           create database 数据库名;
+        （2）  删除数据库           drop database 数据库;
+        （3）  查看数据库信息       show create database 数据库名;
+        （4）  查询所有数据库       SHOW DATABASES;
+        （5）  使用数据库           use 数据库名;
+        （6）  查看正在使用的数据库 SELECT DATABASE();
+三、表格的常用操作；
+
+  <一> 表的操作:关键字+table+表名
+
+      （1）.创建数据库表；
+                      create table 表名(
+		列名  数据类型[长度] [约束],
+		列名  数据类型[长度] [约束],
+		列名  数据类型[长度] [约束]
+	        );
+	
+	数据类型[长度]:如果类型为整数型则不写长度
+				   如果是字符型必须写长度.
+	约束:限制列的数据
+	主键约束:限制当前列的数据 不能是空值，必须是唯一的。
+			 primary key
+	mysql支持主键自动增长 auto_increment 让主键每次自动+1
+	注意:只能是主键自动增长，并且 主键的类型需要是整数
+
+         CREATE TABLE category(
+	cid INT PRIMARY KEY AUTO_INCREMENT,
+	cname VARCHAR(100)
+        );
+
+       （2）删除表：
+                   drop table 表名;   DROP TABLE category;
+
+       （3）查看表的定义结构 ：DESC category;  
+
+       （4） 查看所有表：SHOW TABLES;
+
+       （5） 修改表名 ：  rename table 旧表名 to 新表名;
+                         RENAME TABLE cat TO category;
+
+  <二> 修改表的机构：关键字+table
+
+       （1） 添加列：alter table 表名 add 列名 数据类型[长度] [约束];
+                     ALTER TABLE category ADD `desc` VARCHAR(200);
+
+       （2） 删除列：alter table 表名 drop 列名;  
+                     ALTER TABLE category DROP description;
+
+       （3）修改列名 数据类型 约束：
+                     alter table 表名 change 旧列名 新列名 数据类型[长度] [约束];
+                     ALTER TABLE category CHANGE `desc` description VARCHAR(100);
+
+       （4）修改列的数据类型 约束：alter table 表名 modify 列名 数据类型[长度] [约束];
+                            ALTER TABLE category MODIFY `desc` INT ;
+  
+
+四、字段的操作；
+    1.添加表数据；
+    
+    3.删除表数据；
+    4.查看表数据；
+
+     
+  <一>添加表数据；
+
+       （1）添加数据：insert into
+         方式一：
+               insert [into] 表名(列名1,列名2...) values(值1,值2...)
+	       列名和值的顺序要保持一致 顺序一致 个数一致 数据类型一致
+	       除了数字类型 其他类型都需要加'' 
+         方式二：
+                忽略字段添加：insert into 表名 values(全列值);
+
+         方式三：批量添加
+	insert into 表名(列名1,列名2...) values(值1,值2...),(值1,值2...),(值1,值2...),(值1,值2...)
+
+
+  <二>2.修改表数据
+    
+       （1）修改记录：update
+                    
+	修改记录的格式
+	update 表名 set 列名=值,列名=值... [where 条件]
+	不等于 <>
+	&& and
+	|| or
+	!  not
+
+              UPDATE category SET cname ='化妆品' WHERE cid = 1；
+
+        将cid为6 和为7的分类名称都改成 服装
+
+         UPDATE category SET cname = '服装' WHERE cid =6 OR cid =7;
+
+        （2）删除记录    delete from 表名 [where 条件]
+
+                  DELETE FROM category WHERE cid = 6;
+
+五、约束的设置与删除；
+    1.主键约束；
+
+        主键 primary key
+	主键是每条记录的唯一表示
+	主键列要唯一
+	主键列要非null
+	每个表都应该具备一个主键
+	并且都只能有一个主键
+	并且主键一般都与业务逻辑的字段无关
+      
+ 添加方式一：创建表时 列名后跟主键约束（推荐使用）
+      CREATE TABLE category(
+	cid INT PRIMARY KEY AUTO_INCREMENT,
+	cname VARCHAR(100) ）；
+
+ 添加方式二：constraint区域：最后一列和 );之间的位置
+	[constraint 主键名(自定义)] primary key(字段名)
+       CREATE TABLE category(
+	cid INT,
+	cname VARCHAR(100),
+	CONSTRAINT pk_cid PRIMARY KEY(cid)
+         );
+
+
+ 添加方式三：修改表结构 ：alter table 表名 add [constraint 主键名] primary key(字段名)
+
+
+    2.非空约束；not null   当前列不接收null值
+  
+     方式一：创建表时 列名后直接添加   lastname VARCHAR(100) NOT NULL,  
+
+    方式二：ALTER TABLE persons MODIFY lastname VARCHAR(100) NOT NULL;
+
+   删除非空约束：
+    3.唯一约束；
+                唯一约束 unique,一个表可以有多个唯一约束,但是只有一个主键约束。
+
+       添加方式一：alter table 表名 modify 列名 数据类型[长度] [约束]; 
+
+      CREATE TABLE persons(
+	pid INT PRIMARY KEY AUTO_INCREMENT,
+	lastname VARCHAR(100)  UNIQUE,
+	firstname VARCHAR(100) ,
+	address VARCHAR(100) ,
+	city VARCHAR(100)
+
+      添加方式二：constraint 约束名(自定义) unique(列名)
+        CREATE TABLE persons(
+	pid INT PRIMARY KEY AUTO_INCREMENT,
+	lastname VARCHAR(100)  ,
+	firstname VARCHAR(100) ,
+	address VARCHAR(100) ,
+	city VARCHAR(100),
+	CONSTRAINT UNIQUE(lastname)
+  
+      添加方式二：alter table 表名 add [constraint 约束名]  unique(列名);
+
+    4.删除约束；
+                 删除主键约束
+	         alter table 表名 drop primary key;
+
+        联合主键 将两个字段设置为一个主键
+	两个字段的值不可以都相同
+        ALTER TABLE category ADD PRIMARY KEY(cid,cname);
+
+
+

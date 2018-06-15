@@ -1,0 +1,218 @@
+01.集合_回顾_Java集合体系结构
+	Collection(接口):单列集合
+		|--List(接口):1.有序的；2.有索引；3.可以存储重复元素；
+                        |
+			|--ArrayList(子类):数组结构，查询快  增删慢
+                        |                  线程不安全，效率高
+                        |
+			|--LinkedList(子类):链表结构，查询慢  增删快
+                        |                   线程不安全，效率高
+                        |
+                        |--Vector(子类):数组结构，查询快  增删慢
+                        |               线程安全的，效率低
+                        |
+		|--Set(接口):元素唯一
+                        |
+			|--HashSet(子类):底层数据哈希表  查询和增删都比较快
+                        |
+                        |                无序	唯一
+			|	通过hashCode和equals方法保证元素的唯一性
+			|		先比较hashCode
+			|			如果对象hashCode不相等 直接添加到集合
+			|			如果对象hashCode相等 判断equals方法
+			|					如果相同 不添加
+			|							
+			|					如果不同 添加
+                        |-- HashSet存储自定义类型  需要重写自定义类型的hashCode和equals方法 来保证唯一 
+                        |   Alt+shift+s+h
+                        |
+			|--LinkedHashSet(子类):底层数据链表+哈希表(特例：有序的)    有序 唯一
+				链表：保证顺序；
+				哈希表：保证元素唯一；
+
+	Map(接口)：双列集合
+		|--HashMap(子类)
+		|--LinkedHashMap(子类):
+
+注意：方法总览
+
+
+=========Collection集合（接口）===========================================List集合（接口）=================================================== LinkedList集合类====================
+               *                                                                 *                                                           
+               *                                                                 *                                                  * void  addFirst(E e) 指定元素插入此列表的开头
+               *                                                                 *                                                  * void  addLast(E e) 指定元素添加到此列表的结尾
+               *                                                                 *                                                  * E  removeFirst()移除并返回第一个元素；
+   * boolean  add(E e) 添加元素                                      * E     get(int index)                                         * E  removeLast() 移除并返回最后一个元素；
+   * void clear()  清空集合元素                                      * void  add(int index, E element)指定位置插入指定元素          * E  getLast() 返回此列表第一个元素
+   * boolean contains(Object obj) 判断集合是否包含某个元素           * int   indexOf(Object o)返回第一次出现的指定元素的索引；      * E  getFirst() 返回此列表最后一个元素；
+                                                                                               没有此元素返回：-1；                 * E  pop() 从此列表表示的堆栈出弹出一个元素；
+       实质为元素类型equals()方法判定                                * int   lastIndexOf(Object o)最后出现的指定元素的索引          * void  push(E e) 将元素推入此列表表示的堆栈；
+   * boolean remove(Object obj) 删除指定元素                         * E     remove(int index) 移除指定位置的元素                   * E  element() 获取但不移除此列表的头（第一个元素）。
+   * int size()  获取集合的长度                                      * E     set(int index, E element)替换指定位置的元素            * 
+   * Object[] toArray 将集合转换为数组                               * 
+ 
+   * Iterator iterator() 返回专属本集合元素的迭代器
+   * boolean  equals(Object o) 比较此 collection 与指定对象是否相等。
+   * boolean isEmpty() 判断此集合是否为空，是空返回true;
+   *
+   *
+
+
+02.集合_回顾_Collection接口的常用方法
+	1.boolean add(Object obj):向集合中添加元素
+	2.void clear():清空集合
+	3.boolean contains(Object obj):判断集合中是否包含元素obj。
+	4.boolean remove(Object obj):从集合中移除元素obj。移除成功返回true。
+	5.int size():获取集合内元素的数量。
+	6.Object[] toArray():将集合转换为数组。
+	7.Iterator iterator():获取迭代器--用于遍历集合元素
+03.集合_Collection接口中contains方法判断元素重复的原理
+	Collection<String> strList = new ArrayList<>();
+	strList.add("孙悟空");
+	strList.add("猪八戒");
+	strList.add("沙悟净");
+	strList.add("白骨精");
+	
+	System.out.println("判断白骨精是否在集合中：" + strList.contains("白骨精"));
+	注意：contains方法内部基于：对象的equals()查询
+
+04.集合_Collection存储自定义Person对象重写equals方法
+---------------------------------------------------------------
+05.集合_List集合特点_特有方法
+	1.特点：有序的；可以存储重复元素：
+	2.特有方法：
+		1).void add(int index, E element)：将元素element添加到index位置。原index位置上的元素及其后续其它元素依次后移。
+		2).E get(int index):获取index位置上的元素
+		3).ListIterator<E> listIterator() : 双向迭代器。
+		4).E remove(int index):移除index位置上的元素；
+		5).E set(int index,E element):将元素element替换原index位置上的元素。返回：原index位置上的元素；
+06.集合_Set集合特点
+	1.特点：无序的；不能存储重复元素；
+	2.特有方法：
+		(无)
+
+---------------------------------------------------------------
+07.集合_数据结构_栈
+	1.先进后出
+	2.使用LinkedList可以模拟
+	3.使用java.util.Stack(类):实现栈结构；
+
+08.集合_数据结构_队列
+	1.先进先出
+	2.使用LinkedList可以模拟
+	3.使用java.util.Queue(接口)下的所有子类都可以实现队列；
+
+09.集合_数据结构_数组
+	1.查询快、增删慢；
+
+10.集合_数据结构_链表
+	1.查询慢、增删快；
+---------------------------------------------------------------
+11.集合_LinkedList的基本使用
+	List<String> strList = new LinkedList<>();
+	strList.add("aaa");
+	strList.add("bbb");
+	strList.add("ccc");
+	
+	for(String s : strList){
+		System.out.println(s);
+	}
+12.集合_LinkedList模拟栈结构
+	1.添加：
+		addFirst():模拟压栈
+		addLast()
+	2.获取：
+		getFirst():只获取第一个元素，但不删除(不能模拟弹栈)
+		getLast():只获取最后一个元素；
+	3.删除：
+		removeFirst():删除第一个元素
+		removeLast():删除最后一个元素；
+	  注：getFirst() + removeFirst() : 可以模拟弹栈
+	4.弹栈：
+		pop():弹栈
+	5.判断：
+		isEmpty():判断集合是否为空
+	6.例子：
+		LinkedList<String> list = new LinkedList<>();
+		list.addFirst("aaa");
+		list.addFirst("bbb");
+		list.addFirst("ccc");
+		list.addFirst("ddd");
+		while(!list.isEmpty()){
+			System.out.println("弹出一个：" + list.pop());
+		}
+---------------------------------------------------------------
+13.集合_HashSet的基本使用-存储字符串
+	Set<String> set = new HashSet<>();
+	set.add("aaa");
+	set.add("bbb");
+	set.add("ccc");
+	set.add("ddd");
+	set.add("ddd");//添加失败。返回：false
+	set.add("ddd");//添加失败。返回：false
+	set.add("eee");//ok
+	for(String s : set){
+		System.out.println(s);//1.无序的
+	}
+14.集合_HashSet与增强for循环练习
+	【同上】
+15.集合_HashSet存储自定义对象
+	Set<Cat> set = new HashSet<>();
+	set.add(new Cat("折耳猫","黄色"));
+	set.add(new Cat("波斯猫","白色"));
+	set.add(new Cat("机器猫","蓝色"));
+	set.add(new Cat("熊猫","黑白色"));
+	
+	set.add(new Cat("机器猫","蓝色"));//存储成功
+	
+	for(Cat c : set){
+		System.out.println(c);
+	}
+16.集合_哈希表结构
+	1.哈希表中验证元素唯一性的方式：
+		1).判断哈希值是否相同，如果哈希值都不同，就直接存储；
+		   如果相同：继续判断equals()，如果不同：存；否则：不存；
+
+17.集合_自定义对象重写equals方法和hashCode方法
+	alt + shift + s -->松开 --> h
+
+18.集合_LinkedHashSet集合
+	LinkedHashSet<String> set = new LinkedHashSet<>();
+	set.add("aaa");
+	set.add("bbb");
+	set.add("ccc");
+	set.add("ddd");
+	set.add("eee");
+	
+	for(String s : set){
+		System.out.println(s);//有序的
+	}
+=================================================================================
+学习目标总结：
+01.能够说出List集合特点
+	1.有序的；
+	2.可以存储重复元素；
+
+02.说出使用List存储的数据结构
+	1.ArrayList:数组--查询快、增删慢
+	2.LinkedList:链表--查询慢、增删快
+
+03.能够说出List常见的三个的特点
+	1.有序的；
+	2.可以存储重复元素；
+04.能够说出Set集合的特点
+	1.无序的；
+	2.不能存储重复元素；
+05.说出哈希表的特点
+	1.增删、查询都快。但效率还由"哈希算法";
+
+06.使用HashSet集合存储自定义元素
+	1.为自定义对象重写：hashCode()和equals()
+	2.正常添加，可以避免添加：不同的对象，但属性值完全相同。
+07.说出判断集合元素唯一的原理
+	先判断hashCode()：
+		不同：存
+		相同：判断equals()
+			不同：存
+			相同：不存
+

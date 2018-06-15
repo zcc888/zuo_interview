@@ -1,0 +1,209 @@
+
+                               day 20  mysql单表和多表查询
+
+======================================================================================
+
+一、单表查询
+
+   1.基本查询；
+   2.条件查询；
+   3.模糊查询；
+   4.排序查询；
+   5.聚合查询；
+  6.分组查询；
+
+
+二、多表操作
+
+   1.表与表之间关系；
+   2.外键约束；
+   3.一对多操作；
+   4.多对多操作；
+
+======================================================================================
+
+
+一、单表查询
+
+  查询总结：
+            查询格式：select [distinct] * | 列名，列名  from 表名 where 条件；
+
+   1.基本查询；
+
+             （1）查询所有记录：select * from 表名；
+             （2）查询指定列：select 列名，列名... from 表名；
+             （3）别名查询：as 别名：
+                            SELECT pname AS '名字',price FROM product;
+             （4）去重复查询：distinct 列名：
+                            SELECT DISTINCT price FROM product;
+             （5）简单计算：SELECT pname,price+20 AS 'new price' FROM product;
+
+   
+
+
+   2.条件查询；select [distinct] 列 from 表 [where 条件]
+
+        比较运算符：> < <=  >= =  <>不等于 
+ 
+            between ...and...：显示在某一区间的值（包含头尾）
+                   in （a,b）：显示在in列表中的值，a或者b
+             like '张pattern'：模糊查询，like语句中，
+
+                               % 代表零个或多个任意字符，
+                               _ 代表一个字符；例如：firstname like '_a%'(第二个字母包含a的字符串)   
+
+                      is null：判断是否为空；不为空为：is not null；
+
+        逻辑运算符：
+                 and：多个条件同时成立
+                  or：多个条件任意成立
+                 not：不成立，例如：where not (salary>100)
+
+         -- 3.	选择工资不在500到1200的员工的姓名和工资
+         SELECT ename,sal FROM emp WHERE   sal  NOT BETWEEN 500 AND 1200;
+        
+         -- 6.	选择在1981年雇用的员工的姓名和雇用时间
+         SELECT ename, hiredate FROM emp WHERE hiredate LIKE '1981%'
+         
+         -- 10.	选择姓名中有字母a和e的员工姓名
+         SELECT ename FROM emp WHERE ename LIKE '%a%e%' OR  ename LIKE'%e%a%';
+       
+         -- 12.	将员工的姓名按首字母排序
+         SELECT ename FROM emp ORDER BY ename;
+
+-- 13.	查询公司员工工资的最大值，最小值，平均值，总和
+SELECT MAX(sal) ,MIN(sal),AVG(sal),SUM(sal) FROM emp;
+
+-- 14.	查询各deptno的员工工资的最大值，最小值，平均值，总和
+SELECT MAX(sal) ,MIN(sal),AVG(sal),SUM(sal), deptno FROM emp GROUP BY deptno;
+
+-- 15.	选择具有各个deptno的员工人数
+SELECT COUNT(ename),e.deptno  FROM emp e GROUP BY deptno ;
+
+
+
+   3.模糊查询；
+ 
+        模糊查询  like 必须和通配符配合使用
+	%霸：前面是什么都行 最后必须是'霸'字
+	霸%：后面是什么都行 前面必须是'霸'字
+	%霸%：只要有'霸'字就可以
+
+       查询第二个字为'想'的所有商品信息
+        SELECT * FROM product WHERE pname LIKE '_想%';
+
+
+
+
+   4.排序查询；
+
+              排序
+	order by 列名 
+	ASC: 升序  可以省略 不写默认是升序
+	DESC：降序 
+	排序一般都是查询后再排序 所有oder by 放在语句的最后
+
+        查询价格 对价格进行降序排列 并去重
+        SELECT DISTINCT price FROM product ORDER BY  price DESC;
+
+        查询前10条记录 对价格进行排序
+
+         SELECT * FROM product WHERE pid <= 10 ORDER BY price;
+
+
+
+
+
+
+   5.聚合查询；
+           
+             （1）统计记录数：count(列名)
+             （2）求和：sum(列名)
+             （3）求平均值：avg(列名)
+             （4）求价格 最大值 和最小值：max(列名)  min(列名)
+
+          SELECT AVG(price) FROM product WHERE pid IN (1,2,3,7);
+
+
+
+   6.分组查询；
+
+       分组查询是指使用group by 字句对查询信息进行分组。
+        格式：
+             select 字段1，字段2...from 表名 group by 分组字段 having 分组条件；
+
+               分组查询
+	相同商品名称 价格求和
+	给商品名称相同的分为一组  
+	分组的关键字 group by 列名
+	分组必须和聚合函数在一起使用	
+	分组的列名最好出现在select的语句后
+
+        where:是在查询时进行条件过滤 已经查完了就不能在使用where了 不可以加分组函数
+	having：在分组查询后再进行条件过滤   可以加分组函数
+
+       SELECT pname,SUM(price) FROM product GROUP BY pname;
+
+       相同商品名称 价格求和  只显示价格和大于2000的商品
+       SELECT pname,SUM(price) AS p FROM product GROUP BY pname HAVING p> 2000;
+
+       统计各个分类商品的个数：
+       
+       select category_id,count(*) from product group by category_id;
+
+
+二、多表操作
+
+   1.表与表之间关系；
+
+     实际开发中，项目通常需要多张表才能完成。
+      （1）一对多关系：
+          客户和订单，分类和商品，部门和员工；
+        一对多建表原则：在从表（多方）创建一个字段，字段作为外键指向主表（一方）的主键；
+
+      （2）多对多关系：
+        实例：学生和课程，用户和角色。
+        多对多建表原则：需要创建第三张表，中间表中至少两个字段，这两个字段分别作为外键指向各自一方的主键；
+
+
+
+   2.外键约束；
+
+        外键特点：
+         （1）从表外键的值是对主表主键的引用；
+         （2）从表外键类型，必须与主表主键类型一致；
+
+        声明外键约束：
+        格式：alter table 从表 add [constraint][外键名称] foreign key (从表外键字段名)
+              references 主表（主表的主键）
+         [外键名称] 用于删除外键约束的，一般建议“_fk”结尾；
+          alter table 从表 drop foreign key 外键名称；
+
+         使用外键的目的：保证数据完整性，限制从表中数据输入；
+
+
+        修改表结构添加外键约束
+	主表：category
+	从表：product
+	alter table 从表 add constraint 外键名(自定义) foreign key(从表列名)
+	references 主表(主表列名)
+
+
+   3.一对多操作；
+
+
+
+
+
+
+
+
+   4.多对多操作；
+
+      （1）创建中间表 ，字段分别是主表和从的主键，
+      （2）然后向主表和中间表添加外键约束；
+      （3）向从表和中间表添加外键约束；
+      （4）向中间表添加数据：
+
+
+

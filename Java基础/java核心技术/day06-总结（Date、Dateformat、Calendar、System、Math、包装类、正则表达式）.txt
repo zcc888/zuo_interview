@@ -1,0 +1,287 @@
+
+                                       DAY  6
+
+=====================================================================================
+
+     一、Date类；
+     二、Dateformat类；
+     三、Calendar类；
+     四、System类；
+     五、Math类；
+     六、包装类；
+     七、正则表达式；
+
+
+     一、Date类；
+
+
+        java.util.Date 日期类；
+        时间原点:1970 1 1  00：00：00；
+
+  构造方法
+        public Date()  返回当前时间；Thu Jun 22 16:16:21 CST 2017//不是我想要的格式 “xxxx年xx月xx日”
+        public Date(long time) 返回给定毫秒值的时间；
+    
+  方法
+ 	String toString() 把日期按默认格式打印输出：dow mon dd hh:mm:ss zzz yyyy
+            注：直接打印Date对象，就是调用toString()方法。
+
+        long getTime() 获取当前日期对象的毫秒值；1498119570764（ms）。
+        void setTime(long time)  设置当前日期对象的毫秒值；
+                  //d.setTime(16796167986987L);
+		    System.out.println(d);//Sun Apr 02 10:13:06 CST 2502
+
+
+
+     二、Dateformat类；
+
+        java.text.DateFormat 日期格式化类:抽象类，以与语言无关的方式格式化并解析日期或时间。
+        DateFormat是一个抽象类不能直接使用，需要使用其子类 SimpleDateFormat，
+        SimpleDateFormat类允许进行格式化（也就是日期 -> 文本）、解析（文本-> 日期）和标准化。
+  构造方法
+         DateFormat  df=new SimpleDateFormat();//多态
+  	   public SimpleDateFormat()   默认的格式  17-6-22 下午4:33
+  	   public SimpleDateFormat(String pattern)  给定格式  "HH:mm:ss yyyy-MM-dd" >>>>16:33:48 2017-06-22
+
+  方法：
+
+    （1）日期 ---字符串  
+         String format(Date date) 将日期转换为字符串
+         DateFormat df1=new SimpleDateFormat("HH:mm:ss yyyy-MM-dd" );
+             //格式都是针对字符串规定的，1、日期转换为指定格式字符串；2、指定格式字符串--->日期
+		String s1=df1.format(date);
+		System.out.println(s1);//12:11:14 2117-04-02
+  
+    （2）字符串 --- 日期
+  	 Date parse(String source) 将字符串转换为日期（转换时，该String要符合指定格式，否则不能转换）。
+         DateFormat df1 = new SimpleDateFormat("HH:mm:ss yyyy-MM-dd");
+         Date d2 = df1.parse("05:45:55 1343-05-14");
+         System.out.println(d2);      //Wed May 14 05:45:55 CST 1343
+	 long ti = d2.getTime();
+	 System.out.println(ti);     //-19774030445000(ms)
+        //将当前时间转化为字符串
+		//创建当前日期对象
+		Date now = new Date();
+		//创建日期格式化类对象
+		DateFormat df = new SimpleDateFormat("yyyy年MM月dd日  HH:mm:ss E");
+		//调用日期格式化类的format方法进行转换
+		String s = df.format(now);
+		//打印字符串
+		System.out.println(s);
+		System.out.println("-----------------------");
+		//获取"1949-10-01"这个字符串所表示时间的毫秒值
+		//创建日期格式化类对象
+		DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
+		//调用parse方法将字符串转换为日期
+		Date date = df2.parse("1949-10-01");
+		//调用日期类getTime方法 获取毫秒值
+		long time = date.getTime();
+		System.out.println(time);
+
+     三、Calendar类；
+
+         java.util.Calendar 日历类：替换掉许多需要Date类的方法。
+         Calendar本身是抽象类，需要处理语言敏感性，Calendar类在创建对象时并非直接创建，
+         而是通过静态方法创建，将语言敏感内容处理好，再返回子类对象，
+  （1）静态方法创建对象
+  	Calendar c = Calendar.getInstance();  //返回当前日历对象
+  
+  （2）方法  Field(字段>>>:YEAR、MONTH、DAY)
+
+       ①、 int get(int Field) 获取指定时间信息
+                        YEAR 年
+                        MONTH 月，从0开始算起，最大11；0代表1月，11代表12月。
+	                DATE 天
+	                HOUR 时
+	                MINUTE分
+	                SECOND秒        
+       ②、 void add(int field, int amount)  根据日历的规则，为给定的日历字段添加或减去指定的时间量。
+       ③、 void set(int field, int value)  将给定的日历字段设置为给定值。
+       ④、 void set(int year, int month, int date) 
+       ⑤、 Date getTime() 将日历对象转换为日期对象
+          Calendar c= Calendar.getInstance();//创建对象
+	  Date date=c.getTime();     // Thu Jun 22 16:57:26 CST 2017  <--返回日期对象
+	  long time=date.getTime();  //  1498121846600   <--返回毫秒值
+	  System.out.println(date);
+	  System.out.println(time);
+
+  注意事项：
+          西方星期的开始为周日，中国为周一。
+          在Calendar类中，月份的表示是以0-11代表1-12月。
+          日期是有大小关系的，时间靠后，时间越大。
+
+           ①  ②  ③  ④  ⑤  ⑥  ⑦
+
+     p
+     四、System类；
+
+  
+        java.lang.System (public final class System extends Object)：抽象类、构造方法private修饰，不许外界实例化对象；
+        所有方法都是 public static 修饰，可以通过类名System.方法名（参数）调用。
+  
+  常用方法：
+      （1）、static long currentTimeMillis() 获取当前时间的毫秒值
+      （2）、static void exit(int i)  退出虚拟机  如果 i=0正常退出，其他为异常状态。
+      （3）、static void gc() 暗示虚拟机 运行垃圾回收
+      （4）、static String getProperty(String key) 根据键找到对应的属性值
+
+    拓展：System提供的复制数组的方法：
+       
+         static void arraycopy(Object src, 
+  		int srcPos, 
+  		Object dest, 
+  		int destPos, 
+  		int length) 
+  
+        Object src :源数组
+        int srcPos:源数组的开始索引
+        Object dest : 目标数组
+        int destPos:目标数组的开始索引
+        int length : 复制的长度
+
+
+      五、Math类；
+
+        数学工具类  java.lang.Math：抽象类，private修饰，无法实例化对象，类名.方法名()调用方法；
+       （1）、static int abs(int a)  返回绝对值
+       （2）、static long round(double a)  四舍五入
+       （3）、static int round(float a) 
+       （4）、static double ceil(double a)  向上取整
+       （5）、static double floor(double a) 向下取整
+       （6）、static int max(int a, int b) 两个数最大值
+       （7）、static int min(int a, int b) 两个数最小值
+       （8）、static double pow(double a, double b)   a的b次幂
+       （9）、static double random() random方法，产生一个大于等于0.0且小于1.0的double小数
+
+      六、包装类；
+      
+         基本数据类型无法调用方法，实现复杂运算；而类的对象又无法参与具体运算；
+       java提供了基本数据类型对象的包装类解决以上两个问题。
+         java将基本数据类型值封装成了对象，可以提供更多的操作基本数值的功能。
+         
+          java.lang.Integer 
+                
+          字符串---基本类型
+                 static int parseInt(String s)
+          基本类型 ---字符串
+                String s = 100+"";
+
+          基本类型与对象之间的转换
+                int --- Integer
+                   public Integer(int i)
+                   public Integer(String s)
+                
+                Integer --- int 
+                	  int intValue()
+
+           JDK1.5
+             自动装箱 
+                int --- Integer
+             自动拆箱
+                Integer ---int 
+           byte常量池细节
+
+                Integer i1 = 500;//new Integer(500)
+		Integer i2 = 500;//new Integer(500)
+		System.out.println(i1 == i2 );//false
+		System.out.println(i1.equals(i2));//true
+		
+		
+	   //在byte范围内  -128   127
+		Integer i3 = 127;//new Integer(50)
+		Integer i4 = 127;//i4 = i3
+		System.out.println(i3 == i4 );//true
+		System.out.println(i3.equals(i4));//true
+
+     七、正则表达式；
+
+          正则表达式：用来表示正确规则的字符串 用来匹配某个字符串是否符合某种规则。
+     在Pattern类中有正则表达式的的规则定义，正则表达式中明确区分大小写字母。
+        正则规则
+           (1)  字符：x
+                含义：代表的是字符x，匹配规则“a”
+           (2)  字符：\\
+                含义：代表的是斜线字符'\' ,匹配规则“\\”
+          （3） 字符：\t
+                含义：制表符,匹配规则“\\t”
+          （4） 字符：\n
+                含义：换行符。匹配规则为"\\n"
+          （5） 字符：\r
+                含义：回车符。匹配规则为"\\r"
+
+          （6） 字符类：[abc]
+                含义：代表的是字符a、b 或 c中的任意一个。匹配规则为"[abc]"
+          （7） 字符类：[^abc]
+                含义：代表的是除了 a、b 或 c以外的任何字符
+          （8） 字符类：[a-zA-Z]
+                含义：代表的是a 到 z 或 A 到 Z，两头的字母包括在内
+          （9） 字符类：[a-zA-Z_0-9]
+                含义：代表的字母或者数字或者下划线(即单词字符)
+
+
+          （10）预定义字符类：.
+                含义：代表的是任何字符；如果就想使用 . 的话，使用匹配规则"\\."来实现
+          （11）预定义字符类：\d
+                含义：代表的是 0到9数字，两头的数字包括在内，相当于[0-9]
+          （12）预定义字符类：\w
+                含义：代表的字母或者数字或者下划线(即单词字符)，相当于[a-zA-Z_0-9]
+
+          （13）边界匹配器：^
+                含义：代表的是行的开头，匹配规则为^[abc][0-9]$ 
+          （14）边界匹配器：\b
+                含义：代表的是单词边界。字母、数字和下划线_统称为字母字符，除此之外，都是单词边界。
+
+          （15）数量词：X?  ：0 & 1
+                含义：代表的是X出现一次或一次也没有
+          （16）数量词：X*  ：0 & >1
+                含义：代表的是X出现零次或多次
+          （17）数量词：X+  ：1 & >1
+                含义：代表的是X出现一次或多次
+          （18）数量词：X{n}
+                含义：代表的是X出现恰好 n 次
+          （19）数量词：X{n,}
+                含义：代表的是X出现至少 n 次
+          （20）数量词：X{n,m}
+                含义：代表的是X出现至少 n 次，但是不超过 m 次
+          （21）逻辑运算符：XY
+                含义：代表的是X后跟Y
+          （22）逻辑运算符：X|Y
+                含义：代表的是X 或 Y
+          （23）逻辑运算符：X|Y
+                含义：代表的是X 或 Y
+
+         字符串中涉及正则的方法
+
+                boolean string.matchs(String regex);匹配成功返回true，否则返回false.
+
+                String[] split(String regex)
+                                                    
+                String repalceAll(String old,String new)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,403 @@
+
+                                  day 23  JDBC连接池和DBUtils工具
+
+
+   知识结构：
+
+            问题导入：多用访问数据库，怎样提高访问效率（多个连接）？------>>>使用连接池，工具类简化开发数据库程序：
+
+            DBCPUtils和C3P0Utils工具类（简化原生态JDBC连接数据库六大步骤），进一步使用DBUtils工具类；
+
+====================================================================================================================
+
+一、连接池原理及常见连接池
+
+   1.连接池原理：
+   2.常见连接池介绍；
+
+
+
+二、使用DBCP连接池进行数据库操作
+
+   1.使用步骤：使用jar包，使用的工具类：
+   2.写出使用DBCP连接池获取连接的代码；
+
+
+
+三、使用C3P0连接池进行数据库操作
+
+   1.使用步骤：使用jar包，使用的工具类：
+   2.比较DBCP,的优点：
+   3.写出使用DBCP连接池获取连接的代码；
+
+
+四、使用DBUtils工具类连接池进行数据库操作
+
+   1.使用步骤：使用jar包，使用的工具类：
+   2.结果集处理；
+   3.写出使用DBCP连接池获取连接的代码；
+
+
+
+==================================================================================================================
+
+
+一、连接池原理及常见连接池
+
+   1.连接池原理：理解为存放多个连接的集合。
+                 用户使用连接时，可以从集合中获取连接；使用完毕后，关闭资源也是close()方法，但不是真的将
+                 连接关闭，而是将连接还回连接池中。
+           用户--------->>连接池-------->>连接---------完毕，连接关闭-------->>还回连接池
+    目的：解决建立数据库链接耗费资源和时间很多的问题，提高性能。
+     
+   2.常见连接池介绍；
+            Java为数据库连接池提供了公共的接口：javax.sql.DataSource，接口的抽象方法 Connection  getConnection()获取连接；
+            各个厂商需要让自己的连接池实现这个接口。这样应用程序可以方便的切换不同厂商的连接池！
+         常见的连接池：DBCP、C3P0。
+
+二、使用DBCP连接池进行数据库操作
+
+   1.使用步骤：使用jar包，使用的工具类：
+ 
+        （1）Apache推出的：Database Connection Pool
+        （2）使用的jar包：commons-dbcp-1.4.jar  和  commons-pool-1.5.6.jar
+        （3）使用的工具类：BasicDataSource,实现了Datasource接口，调用getConnection()方法，获取连接对象；
+             使用 : BasicDataSourceFactory ,通过 createDatasource()方法 获得 DataSource;
+        （4）
+              
+          * 做一个DBCP的工具类，使用DBCP连接池获取数据库链接；
+          * JDK提供了一个规范接口：
+          *                  java.sql.DataSource
+          *            抽象方法：Connection  getConnection()获取连接；
+          * DBCP连接池，有一个类实现了此接口，BasicDataSource:
+          * 如果想获取连接，只要创建BasicDataSource对象，调用getConnetion()方法即可：
+          * 但是要注意，此方法没有谅解数据库的4大必要要素，(注册驱动，url、username、password)
+          * 所以，需要手动配置，调用BasicDataSource 的方法进行配置即可；
+ 
+
+
+   2.写出使用DBCP连接池获取连接的代码；
+
+/*
+ * 读取配置文件，使用DBCP连接池获取连接；
+ * BasicDataSourceFactory
+ *       静态方法
+ *        static DataSource createDataSource(Properties p);
+ *       参数
+ *       Properties p:配置文件的集合，只需创建集合，将配置文件的内容加载
+ *       返回值
+ *        java.sql.DataSource:是一个接口，此方法会返回这个接口的实现类对象；
+ *           BasicDataSource
+ */
+public class DBCPUtils2 {
+
+	//成员位置定义一个DataSource
+	private static DataSource datasource=null;
+	static{
+		try{
+			//创建properties 集合对象，加载配置文件
+			Properties p=new Properties();
+			InputStream in=DBCPUtils2.class.getClassLoader().getResourceAsStream("dbcp-config.properties");
+			p.load(in);
+			//调用createDataSource方法创建BasicDataSource对象；
+			datasource=BasicDataSourceFactory.createDataSource(p);			
+		}catch(Exception e){
+			throw new RuntimeException("连接获取失败！"+e);
+		}
+	}
+	public static DataSource getDataSource(){
+		return datasource;
+	}
+	public static void close(Connection con,Statement stat,ResultSet rs){
+		
+		if(rs!=null){
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}	
+		}
+		if(stat!=null){
+			
+			try {
+				stat.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if(con!=null){
+			
+			try {
+				con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+      
+      方法调用：
+               //获取数据库链接对象
+		DataSource dataSource = DBCPUtils2.getDataSource();
+		Connection con = dataSource.getConnection();
+		//创建执行sql语句的对象；
+		String sql="select * from product where id=?";
+		
+		PreparedStatement ps = con.prepareStatement(sql);
+		ps.setObject(1, 7);
+		Object[] objs=new Object[3];
+		ResultSet rs = ps.executeQuery();
+		//处理结果集
+		while(rs.next()){
+			int id=rs.getInt("id");
+			String name=rs.getString("name");
+			double price=rs.getDouble("price");
+			objs[0]=id;
+			objs[1]=name;
+			objs[2]=price;
+		}
+		System.out.println(Arrays.toString(objs));;
+		//关闭资源
+		DBCPUtils2.close(con, ps, rs);
+
+三、使用C3P0连接池进行数据库操作
+
+   1.使用步骤：使用jar包，使用的工具类：
+        （1）使用c3p0连接池 获取数据库连接： ComboPooledDataSource implemts java.sql.DataSource。
+        （2）
+
+   2.相较于DBCP连接池C3P0的优点：
+
+                 （1）有xml的配置文件，不需要手动配置，即可完成；
+                 （2）没有调用类似 createDataSource()方法，直接生成  DataSource 对象 ；
+                 （3）C3P0开源免费的连接池！目前使用它的开源项目有：Spring、Hibernate等。
+                     使用第三方工具需要导入jar包，c3p0使用时还需要添加配置文件（src目录下） c3p0-config.xml（文件名不要写错）。
+
+   3.写出使用C3P0连接池获取连接的代码；
+        
+                  //获取dataSource对象；
+		Connection con = C3P0Utils.getConnection();
+		//sql语句
+		String sql="select * from product where id=?";
+		PreparedStatement ps = con.prepareStatement(sql);
+		//为？赋值
+		ps.setObject(1, 6);
+		ResultSet rs = ps.executeQuery();
+		//处理结果集
+		while(rs.next()){
+			int id=rs.getInt("id");
+			String name=rs.getString("name");
+			double price=rs.getDouble("price");
+			Product p=new Product(id,name,price);
+			System.out.println(p);
+		}
+		//关闭资源；
+		C3P0Utils.close(con, ps, rs);
+
+
+四、使用DBUtils工具类连接池进行数据库操作
+
+      简化JDBC代码开发，本案例我们将采用apache commons组件一个成员：DBUtils。
+      DBUtils就是JDBC的简化开发工具包。需要使用技术：连接池（获得连接），SQL语句都没有少。
+
+    《A-A》JavaBean组件：就是一个类，在开发中常用于封装数据。具有如下特性
+       
+       1.需要实现接口：java.io.Serializable ，通常偷懒省略了。
+       2.提供私有字段：private 类型 字段名;
+       3.提供getter/setter方法：
+       4.提供无参构造
+
+
+
+
+   1.使用步骤：使用jar包，使用的工具类：
+  
+    DBUtils是java编程中的数据库操作实用工具，小巧简单实用。
+    DBUtils封装了对JDBC的操作，简化了JDBC操作，可以少写代码。
+    Dbutils三个核心功能介绍
+
+ *    （1）QueryRunner：提供对sql语句操作的API；
+ *    （2）ResultSetHandler：接口，用于定义select操作后，怎样封装结果集.
+ *    （3）DbUtils类，它就是一个工具类,定义了关闭资源与事务处理的方法
+ * 
+ * 使用DBUtils进行更新数据
+ * 
+ * QueryRunner （注：以下构造方法和方法是对应使用的；）
+ * 	构造方法
+ *      （1） QueryRunner() 空参构造创建对象 在调用方法时 需要自己维护Connection连接
+ * 	（2）QueryRunner(DataSource ds)  带参构造创建对象时，需要传入一个连接池，连接池来维护连接
+ * 							   在调用方法时 可以选择不传入连接的方法
+ * 
+ *	 1) int  update(Connection conn, String sql, Object ...params) 执行更新数据 ：insert、update、delete；
+ *	 2) int  update(String sql, Object... params) 
+             
+ *	 参数
+ *		Connection conn：连接对象 如果空参构造则传连接 如果带参构造不传连接	
+ *		String sql:sql语句 支持?占位符
+ * 		Object... params：可以传任意类型数据 并且可以传任意个  为?占位符赋值
+ */
+
+/*
+ * 使用QueryRunner查询数据；
+ *      1) T Query(Connection con,String sql,ResultSetHandler<T> rsh,Object...params);
+ *      2) T query(Strin sql,ResultSetHandler<T> rsh,Object...params);         执行查询select;
+ *         ResultSetHandler<T> rsh:结果集处理的接口，可以传入其实现类对象，传入哪个实现类对象，结果是不一样的；
+   
+   2.结果集处理；
+
+               public static void main(String[] args) throws SQLException {
+		//将product表中 手表的价格改为1000
+		method2();
+		//将自行车价格改为  1000
+	}
+	////将product表中 手表的价格改为1000
+	public static void method1(){
+		Connection con = C3P0Utils.getConnection();
+		try {
+			//创建QueryRunner对象 不传数据源
+			QueryRunner qr = new QueryRunner();
+			//调用QueryRunner的update方法
+			String sql = "update product set price = ? where id = ?";
+			Object[] params = {1000,8};
+//			qr.update(C3P0Utils.getConnection(), sql, 1000,8);
+			int row = qr.update(con, sql,params);
+			System.out.println(row);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}finally {
+			try {
+				DbUtils.close(con);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+     
+   
+   3.写出使用DBCP连接池获取连接的代码；
+
+
+            /*
+	 * 查询一条数据时使用 如果多条数据只会取第一条
+	 * ArrayHandler 将一条数据封装到一个Object类型的数组中
+	 * 
+	 */
+	public static void arr() throws SQLException{
+		//查询数据库中的第一条数据
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		//执行查询
+		String sql = "select * from product where id = ?";
+		Object[] obj = qr.query(sql, new ArrayHandler(), 1);
+		System.out.println(obj);//null
+		System.out.println(Arrays.toString(obj));
+		
+	}
+	/*
+	 * 查询多条记录时使用
+	 * ArrayListHandler将每条数据都封装进一个Object数组
+	 * 将多个Object[]放入一个集合中
+	 */
+	public static void arrList() throws SQLException{
+		//查询product表中所有记录
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		//执行查询
+		String sql = "select * from product";
+		List<Object[]> list = qr.query(sql, new ArrayListHandler());
+		System.out.println(list);//[]
+		for (Object[] objs : list) {
+			System.out.println(Arrays.toString(objs));
+		}
+	}
+	/*
+	 * 查询一条记录时使用 
+	 * BeanHandler 将结果集的第一条记录封装到一个javaBean对象中
+	 * BeanHandler构造方法中需要传递一个javaBean对象的类型
+	 */
+	public static void bean() throws SQLException{
+		//查询product表中id=2的记录
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		String sql = "select * from product where id = ?";
+		Product p = qr.query(sql, new BeanHandler<Product>(Product.class),2);
+		System.out.println(p);
+	}
+	
+	/*
+	 * 查询多条记录时使用
+	 * BeanListHandler 将结果集的每条记录都封装到javaBean对象中
+	 * 将多个javaBean对象放入List集合中
+	 */
+	
+	public static void beanList() throws SQLException{
+		//查询product表中所有记录
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		String sql = "select * from product";
+		List<Product> list = qr.query(sql, new BeanListHandler<Product>(Product.class));
+		System.out.println(list);//[]
+		for (Product product : list) {
+			System.out.println(product);
+		}
+	}
+	/*
+	 * 查询一列时使用
+	 * ColumnListHandler 将结果中一列数据封装到List集合
+	 */
+	public static void columnList() throws SQLException{
+		//查询所有价格
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		String sql = "select * from product";
+		List<Object> query = qr.query(sql, new ColumnListHandler("name"));
+		for (Object object : query) {
+			System.out.println(object);
+		}
+		
+	}
+	/* 查询单个数据
+	 * ScalarHandler 查询单个结果 一般情况 都是查询条数 求和 等等
+	 */
+	public static void scalar() throws SQLException{
+		//查询价格的最大值 和最小值
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		String sql = "select max(price) as max ,min(price) as min from product";
+		Object obj = qr.query(sql, new ScalarHandler("max"));
+		System.out.println(obj);
+	}
+	
+	/*
+	 * 查询一条记录时使用
+	 * MapHandler 将一条记录封装到一个Map集合中
+	 * Map<String,Object>
+	 * String 列名
+	 * Object 查询出来的值
+	 */
+	
+	public static void map() throws SQLException{
+		//查询id=3的记录
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		String sql = "select * from product where id = ?";
+		Map<String, Object> map = qr.query(sql, new MapHandler(),3);
+//		for(String key  : map.keySet()){
+//			Object value = map.get(key);
+//			System.out.println(key+"="+value);
+//			
+//		}
+		Set<String> set = map.keySet();
+		for (String key : set) {
+			Object value = map.get(key);
+			System.out.println(key+"="+value);
+		}
+	}
+	/*
+	 * 查询多条记录
+	 * MapListHandler 将多条记录中的每条记录都封装到一个Map集合
+	 * 将多个map集合放入到一个List集合中
+	 */
+	public static void mapList() throws SQLException{
+		//查询所有的记录
+		QueryRunner qr = new QueryRunner(C3P0Utils.getDateSource());
+		String sql = "select * from product ";
+		List<Map<String,Object>> list = qr.query(sql, new MapListHandler());
+		for (Map<String, Object> map : list) {
+			for(String key : map.keySet()){
+				Object value = map.get(key);
+				System.out.print(key+"="+value);
+			}
+			System.out.println();
+

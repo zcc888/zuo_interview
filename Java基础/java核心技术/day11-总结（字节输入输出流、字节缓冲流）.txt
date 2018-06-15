@@ -1,0 +1,221 @@
+
+                                       day  11     字节输入输出流    字节缓冲流
+
+============================================================================================================================
+
+一、IO简介
+    1.IO的定义；
+    2.IO的继承结构；
+    3.一切都是字节；
+
+二、字节输入流和字节输出流：
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+一、IO流
+
+IO流的分类
+  	  操作的数据分类
+  	 	字节流：可以操作最基本的字节  每次可以操作1个字节  
+  			     计算机上的任意数据都是用字节来表示的  字节流可以操作计算机上的一切数据
+ 		字符流 ：可以操作字符 每次可以操作一个字符 只能操作文本文件
+       文本文件:用文本工具 记事本 notpad++ editplus 打开人能够看懂的都是文本文件
+       常见的文本文件： txt java html css  js xml
+       word和excel是不是文本文件？  不是
+    按照流的流向分类
+    	字节输入流
+    		抽象基类   InputStream  read（）方法 读一个字节 读一个字节数组read(byte[] b)
+    		FileInputStream      
+    	字节输出流
+    		抽象基类    OutputStream  write()方法  写一个字节 写一个字节数组write(byte[] b)
+    		FileOutputStream
+    	字符输入流
+    		抽象基类    Reader      read方法  读一个字符  读一个字符数组 read(char[] ch)
+    		FileReader
+    	字符输出流
+    		抽象基类    Writer      write方法  写一个字符  写一个字符数组 写字符串 write(char[] ch)
+    		FileWrter
+   
+   IO流的命名规则    FileWriter FileReader  前缀 是这个流可以干什么  
+   								        后缀 父类的名字
+
+      1.字节输出流
+
+     java.io.OutputStream 所有字节输出流的超类 抽象基类
+    常用方法
+  		write(int a) 一次写一个字节 
+  		write(byte[] b) 一次写一个字节数组
+  		write(byte[] b , int off,int length) 一次写字节数组的一部分
+  		close()   关闭资源
+  FileOutputStream extends OutputStream
+  构造方法 绑定数据目的
+  		public FileOutputStream(File file)
+ 		public FileOutputStream(String file)
+  
+       1.创建字节输出流对象
+       2.调用write方法写数据
+       3.关闭资源
+  
+      当创建字节输出流对象时，如果没有目的文件 会自动创建，如果目的文件已经存在，则覆盖
+
+      字节流可以不刷新
+      IO流本身不具备读写功能，都是在调用操作系统的读写功能，使用完毕后，需要进行关闭资源。
+
+
+
+      2.字节输出流的追加与换行
+
+        FileOutputStream的构造方法
+  		FileOutputStream(File file, boolean append) 
+  		FileOutputStream(String name, boolean append) 
+ 		 参数
+ 			boolean append:如果为true 则追加写入  如果为false或者不写则覆盖
+ 
+         换行：\r\n
+
+
+      java.io.InputStream  字节输出流的超类  抽象基类
+      常用方法
+  		int  read() 一次读一个字节
+  		int  read(byte[] bytes) 一次读一个字节数组
+  FileInputStream extends InputStream
+  构造方法需要绑定数据源
+  		FileInputStream(File file)
+  		FileInputStream(String path)
+  1.创建字节输入流对象
+  2.调用read方法读取字节
+  3.关闭资源
+
+       字节输入流一次读取一个字节数组
+
+       3.字节缓冲输入流
+
+      java.io.BufferedOutputStream extends OutputStream
+     方法
+  	   write(int a) 写一个字节
+  	   write(byte[] bytes) 写一个字节数组
+  	   write(byte[] bytes , int off ,int length) 写字节数组的一部分
+  构造方法
+  	
+       4.字节缓冲输出流
+      	
+        BufferedOutputStream(OutputStream out) 
+  		参数 
+  			OutputStream out :  所有字节输出流的超类 可以传入 FileOutputStream
+  1.创建字节缓冲输出流对象 绑定字节输出流 字节输出流绑定数据目的
+  2.调用write方法写数据
+  3.关闭资源
+
+
+
+       复制单级文件夹
+  
+       数据源:d:\\demo
+       数据目的:d:\\work\\abc
+
+                File src = new File("d:\\demo");
+		File dest = new File("d:\\work\\abc");
+		copyDir(src,dest);
+	}
+	
+	public static void copyDir(File src, File dest) throws IOException{
+		//获取数据目的的文件夹
+		//获取文件夹名字
+		String name = src.getName();
+		//确定数据目的的文件夹
+		File destDir = new File(dest,name);
+		//创建文件夹
+		destDir.mkdir();
+		
+		//获取数据源下的所有文件的数组
+		File[] FileArr = src.listFiles();
+		//遍历数据 依次获取每个文件 获取每个文件名
+		for(File srcFile:FileArr){
+			//获取每个文件名
+			String srcName = srcFile.getName();
+			//确定数据目的的每个文件名
+			File destFile = new File(destDir,srcName);
+			
+			//复制
+			copyFile(srcFile,destFile);
+		}
+	
+	public static void copyFile(File src ,File dest) throws IOException{
+		//创建字节输入缓冲流对象
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(src));
+		//创建字节输出欢洪流对象
+		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(dest));
+		byte[] bytes = new byte[1024*10*10];
+		int len = 0;
+		while((len = bis.read(bytes))!=-1){
+			bos.write(bytes,0,len);
+		}
+		//关闭资源
+		bos.close();
+		bis.close();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

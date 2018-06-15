@@ -1,0 +1,229 @@
+
+                                           day 16  （基础加强_注解_类加载器_动态代理）
+
+===============================================================================================================
+
+一、Junit单元测试
+
+   1.会使用Junit进行测试，并熟记运用格式；
+
+二、注解：
+
+   1.注解的定义及注解的作用；
+   2.JDK提供的常见注解；
+   3.自定义注解格式使用（属性的命名）；
+   4.元注解对自定义注解的限定（使用位置及生命周期）；
+   5.注解的解析综合案例；
+
+三、类的加载器；
+
+   1.三种类的加载器关系；
+   2.类的加载机制：全盘负责委托机制：
+
+
+四、动态代理;
+
+   1.Proxy类的静态方法创建代理对象：
+   2.代理对象的使用：
+
+------------------------------------------------------------------------------------------------------------
+
+一、Junit单元测试
+
+   1.会使用Junit进行测试，并熟记运用格式；
+
+      JUnit是一个Java语言的单元测试框架，简单理解为可以用于取代java的main方法。
+
+      使用格式：
+               （1）在测试类方法上添加注解 @Test；
+               （2）鼠标点击“@Test”，使用快捷键“ctrl + 1”，点击“Add Junit…”；
+               （3）5.	使用：选中方法右键，执行当前方法；选中类名右键，执行类中所有方法（方法必须标记@Test）。
+
+      常用注解：
+               @Test，用于修饰需要执行的方法
+               @Before，测试方法前执行的方法 之前  不可以单独使用 必须配合 @Test
+               @After，测试方法后执行的方法  之后  不可以单独使用 必须配合 @Test
+     
+     （2）单元测试 
+        * 前提
+        * 方法必须没有参数 没有返回值
+        * 使用 在方法上加上 @Test 注解  报错后 鼠标导入jar包  先选中方法  右键执行
+        * 选中类执行的化  这个类中哪个方法上有@Test哪个方法就会执行
+
+二、注解：
+
+   1.注解的定义及注解的作用；
+
+      （1）注解：Annotation注解，是一种代码级别的说明。它是JDK1.5及以后版本引入的一个特性，与类、接口、枚举是在同一个层次
+
+           对比注释：注释是给开发人员阅读的，注解是给计算机提供相应信息的。
+
+      （2）注解的作用： 
+                     （1）编译检查：通过代码里标识注解，让编译器能够实现基本的编译检查。例如：@Override
+                     （2）代码分析：通过代码里标识注解，对代码进行分析，从而达到取代配置文件目的。
+                     （3）编写文档：通过代码里标识注解，辅助生成帮助文档对应的内容
+
+   2.JDK提供的常见注解；
+
+       使用在：方法上  类上  成员变量上
+       （1）@Deprecated 表示被修饰的方法已经过时。过时的方法不建议使用，但仍可以使用。
+       （2）@Override  JDK5.0表示复写父类的方法；jdk6.0 还可以表示实现接口的方法
+       （3）@SuppressWarnings 表示抑制警告，被修饰的类或方法如果存在编译警告，将被编译器忽略
+           
+     @SuppressWarnings({"unused","rawtypes","unchecked","null","deprecation","serial"} )
+
+           deprecation ，忽略过时
+	   rawtypes ，忽略类型安全
+	   unused ，忽略不使用
+	   unchecked ，忽略安全检查
+	   null，忽略空指针
+           serial, 忽略序列号
+	   all，忽略所有
+
+   3.自定义注解格式使用（属性的命名）；定义注解使用关键字： @interface 
+
+       （1）定义带有属性的注解：
+               ?	属性格式：修饰符 返回值类型  属性名()  [default 默认值]
+            1).1.修饰符：默认值 public abstract ，且只能是public abstract。
+            2).2.返回值类型：基本类型、字符串String、Class、注解、枚举，以及以上类型的一维数组
+            3).3.属性名：自定义
+            4).4.default 默认值：可以省略
+
+         完整含属性注解:
+
+         @interface MyAnno3{
+	int age() default 1;
+	String password();
+	Class clazz();
+	MyAnno2 myAnno(); // 注解
+	Color color(); // 枚举
+	String[] arrs();
+       }
+         enum Color{
+	BLUE,RED;
+      }
+
+
+       （2）自定义注解的使用格式：@注解类名( 属性名= 值 , 属性名 = 值 , .....)
+            @MyAnno_3(
+		age=18 , 
+		password="1234" ,
+		clazz=String.class , 
+		myAnno=@MyAnno_2 , 
+		color = Color.RED , 
+		arrs = {"itcast","itheima"} 
+                 )
+              publicclass MyAnnoTest_4 {}
+
+
+       注解使用的注意事项:
+          （1）属性格式：属性名=属性值，多个属性使用逗号分隔。
+          （2）如果属性名为value，且当前只有一个属性，value可以省略。
+          （3）如果使用多个属性时，k的名称为value不能省略。
+          （4）如果属性类型为数组，设置内容格式为：{ 1,2,3 }。例如：arrs = {"itcast","itheima"}
+          （5）如果属性类型为数组，值只有一个{} 可以省略的。例如：arrs = "itcast"
+          （6）一个对象上，注解只能使用一次，不能重复使用。
+
+   4.元注解对自定义注解的限定（使用位置及生命周期）；
+         （1）@Retention 用于确定被修饰的自定义注解生命周期
+               RetentionPolicy.SOURCE 被修饰的注解只能存在源码中，字节码class没有。
+               RetentionPolicy.CLASS 被修饰的注解只能存在源码和字节码中，运行时内存中没有。
+               RetentionPolicy.RUNTIME 被修饰的注解存在源码、字节码、内存（运行时）。用途：取代xml配置
+
+         （2）@Target 用于确定被修饰的自定义注解使用位置
+                   ElementType.TYPE 修饰类、接口
+                   ElementType.CONSTRUCTOR  修饰构造
+                   ElementType.METHOD 修饰方法
+                   ElementType.FIELD 修饰字段
+
+         （3）@Documented 使用javaDoc生成 api文档时，是否包含此注解 (了解)
+         （4）@Inherited 如果父类使用被修饰的注解，子类是否继承。（了解）
+
+       @Target(ElementType.TYPE)
+       @Retention(RetentionPolicy.RUNTIME)
+       @interface MyAnno1{
+
+
+   5.注解的解析综合案例；
+
+   如果需要获得注解上设置的数据，那么我们就必须对注解进行解析，JDK提供java.lang.reflect.AnnotatedElement接口允许在运行时通过反射获得注解。
+
+
+常用方法：
+（1）boolean isAnnotationPresent(Class annotationClass) 当前对象是否有注解
+（2）T getAnnotation(Class<T> annotationClass) 获得当前对象上指定的注解
+（3）Annotation[] getAnnotations() 获得当前对象及其从父类上继承的，所有的注解
+（4）Annotation[] getDeclaredAnnotations() 获得当前对象上所有的注解
+
+
+三、类的加载器；
+
+    类加载器：类加载器是负责加载类的对象。将class文件（硬盘）加载到内存生成Class对象。
+    ?	使用	类.class.getClassLoader() 字节码文件对象获得加载自己的类加载器
+        类加载器加载机制：全盘负责委托机制
+
+   1.三种类的加载器关系；
+
+
+
+   2.类的加载机制：全盘负责委托机制：
+
+     全盘负责：A类如果要使用B类（不存在），A类加载器C必须负责加载B类。
+
+
+     委托机制：A类加载器如果要加载资源B，必须询问父类加载是否加载。
+		如果加载，将直接使用。
+		如果没有机制，自己再加载。
+
+四、动态代理;
+
+    java代理有jdk动态代理（面向接口）、cglib代理（面向子类）
+
+    动态代理：程序运行时，使用JDK提供工具类（Proxy），动态创建一个类，此类一般用于代理。
+
+    动态代理使用前提：必须有接口
+
+   1.Proxy类的静态方法创建代理对象：
+  
+     Object proxyObj = Proxy.newProxyInstance(参数1,参数2,参数3);
+           参数1：ClassLoader，负责将动态创建类，加载到内存。当前类.class.getClassLoader();
+           参数2：Class[] interfaces ,代理类需要实现的所有接口（确定方法）,被代理类实例.getClass().getInterfaces(); 
+           参数3：InvocationHandler, 请求处理类，代理类不具有任何功能，代理类的每一个方法执行时，调用处理类invoke方法。
+              
+           voke(Object proxy ,Method ,Object[] args) 
+		参数1：代理实例
+		参数2：当前执行的方法
+		参数3：方法实际参数。
+
+   2.代理对象的使用：
+
+         @Test
+	public void test_2() {
+		List<String> list = new ArrayList<String>();
+		list.add("123");
+		System.out.println(list.size());
+		list = myProxy(list);
+		list.set(0, "1");
+		System.out.println(list.size());
+	}
+	public static List<String> myProxy(final List<String> list) {
+
+		List<String> list2= (List) Proxy.newProxyInstance(ReflectTest.class
+                    .getClassLoader(), list.getClass().getInterfaces(),new InvocationHandler() {
+	            @Override
+		public Object invoke(Object proxy, Method method,Object[] args) throws Throwable {
+		if ("add".equals(method.getName()))
+			throw new UnsupportedOperationException("add NO");
+		if ("set".equals(method.getName()))
+			throw new UnsupportedOperationException("set NO");
+		if ("remove".equals(method.getName()))
+			throw new UnsupportedOperationException("r NO");
+			return method.invoke(list, args);
+					}
+				});
+		return list2;
+	}
+
+
+
+

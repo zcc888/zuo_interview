@@ -1,0 +1,301 @@
+
+                              day 12   IO【转换流、序列化流、打印流、Commons-IO、Properties类 】
+
+
+======================================================================================================================
+
+<一.>  转换流：
+      1.转换流的继承体系：
+      2.编码表的分类及意义；
+      3.使用转换流读取指定编码的文本文件；
+      4.使用转换流写入指定编码的文本文件；
+
+
+<二.>  序列化流与反序列化流：
+      1.序列化流ObjectOutputStream 构造方法（参数）、常用方法；
+      2.反序列化流ObjectInputStream 构造方法（参数）、常用方法；
+      3.读写自定义对象需要实现序列化接口：implements Serializable,类属性创建常量“版本号”进行对比识别；
+      4.不能序列化的三种情况：（1）静态内容；（2）transient(瞬态关键字)修饰部分；（3）未实现标记接口；
+
+<三.>  打印流：
+      1.字节打印流  PrintStream;   字符打印流  PrintWriter;
+      2.两种常用方法：
+                     void print(String str): 输出任意类型的数据，
+                     void println(String str): 输出任意类型的数据，自动写入换行操作
+      3.哪个打印流调用哪个方法打印时不需要刷新；
+
+<四.>  第三方 Commons-IO 包导入与使用
+      1.导包创建路径；
+      2.使用FileUtils 常用方法操作文件：
+
+<五.>  Properties 类
+      1.Properties的继承体系：
+      2.区别其他Set集合使用特点：存储配置文件必须是<String,String>，大部分静态方法，唯一与IO配合使用的集合类；
+      3.向集合内添加键值对、获得键值对Set集合；setPropery()、prop.stringProperyName()、得到对应的值；
+      4.使用Properties的load方法加载文件中配置信息；
+      5.读取文件中的数据，使用Properties的store方法并保存到Properties集合中：
+  
+
+----------------------------------------------------------------------------------------------------------------
+
+
+
+一、转换流：
+
+      问题提示：字节流读取中文字符的问题；
+
+00.IO流的类层次结构：
+	1.字节流：
+		1).输出流：OutputStream ：抽象类 子类输出不需要刷新；
+
+				三种输出的方法：
+				1).write(int b):输出一个字节
+				2).write(byte[] b):输出一个字节数组；
+				3).write(byte[] b,int off,int len):输出字节数组的一部分
+				--------------------------------------------------------
+				|--FileOutputStream(基本流)：构造方法：1).fos(File file) 2).fos(String name)
+				|--FilterOutputStream(不学)
+					|--BufferedOutputStream(缓冲流) 构造方法：bos( fos )
+
+		2).输入流：InputStream ：抽象类
+
+				两种读取的方法：
+				1).int read():读取一个字节；返回值：读取的字节。
+				2).int read(byte[] b):读取一个字节数组；返回值：读取的字节数量。
+				----------------------------------------------------------------
+-				|--FileInputStream(基本流) ：构造方法：1).fis(File file) 2).fis(String name)
+				|--FilterInputStream(不学)
+					|--BufferedInputStream(缓冲流) 构造方法： bis(fis);
+	2.字符流：
+		1).输出流：Writer
+				五种输出的方法：
+				1.write(int c):输出一个字符
+				2.write(char[] chArray):输出一个字符数组；
+				3.write(char[] chArray,int off,int len):输出一个字符数组的一部分；
+				4.write(String s):输出一个字符串；
+				5.write(String s,int off,int len)：输出一个字符串的一部分；
+                                                                                                            编码
+				|--OutputStreamWriter(转换流)：父类，可以指定写入数据的编码形式；“字符”---------->“字节”
+                                        |            构造方法：osw(OutputStream out)或者(out,"编码形式")
+                                        |                      
+					|--FileWriter(基本流) :文件中文字符输出，默认编码表
+				|--BufferedWriter(缓冲流)
+					特有的方法：
+					public void newLine():输出一个跟平台无关的换行符；
+
+		2).输入流：Reader
+				读取的方法：
+				1.int read():读取一个字符；
+				2.int read(char[] c):读取一个字符数组；
+                                                                                                               解码
+				|--InputStreamReader(转换流)：父类，指定编码形式与文件内容编码一致；“字符”<--------“字节”
+					|           构造方法：isr(InputStream in)或者(in,"编码形式")
+                                        |     
+                                        |--FileReader(基本流) ：读取中文字符，默认编码解码；
+				|--BufferedReader(缓冲流)
+					特有方法：
+					public String resdLine():读取一行数据。(注意：不读取换行符的)
+
+
+      02.字符编码表
+	1).ASCII编码表(美国--英语)：1个字节表示一个字符；字节都是正数；0-xxxxxxx;
+	2).UTF-8:国际码表，基于Unicode,
+	3).Unicode:国际码表。2个字节表示一个字符。Java就是支持Unicode码表。包含了少量的中文
+	4).GB2312:早期的中文码表,6K-7K的中文符号；
+	5).GBK : 目前使用的中文码表(替换了GB2312);20k的中文字符；两个字节，一正一负；
+	6).Big5:包含中文繁体，在台湾，香港常用的码表；
+        7).iso-8859-1:拉丁码表 latin，一个字节，1-xxxxxxx，负数；
+ 
+        编程常用编码表：GBK（中文）、UTF-8（特殊符号）、ISO-8859-1（拉丁符号）
+
+
+      03.字符转换输出流：OutputStreamWriter      “字符”----- 编码表   ----->“字节”
+              java.io.Writer
+                 |_java.io.OutputStreamWriter  ：字符转换流原理：字节流+编码表。
+                        |_java.io.FileWriter
+                        
+         1).构造方法：
+                      （1）OutputStreamWriter(OutputStream out)  默认编码表的字符转换流
+                      （2）OutputStreamWriter(OutputStream out, String charsetName)指定编码的转化输出流
+                           String charsetName:指定的编码表  不区分大小写。
+         2).常用方法：
+                      void write(char[] cbuf, int off, int len) 写入字符数组的某一部分。 
+                      void write(int c) 写入单个字符。 
+                      void write(String str, int off, int len) 写入字符串的某一部分。 
+
+
+      04.字符转换输入流：InputStreamReader       “字符”------- 编码表 --------“字节”
+              java.io.Reader
+                   |_java.io.InputStreamReader ：字符转换原理：字节流+编码表；
+                         |_java.io.FileReader
+ 
+         1).构造方法：
+                     （1）InputStreamReader(InputStream in)
+		     （2）InputStreamReader(InputStream in,String charsetName)
+
+         2).常用方法：
+                     （1）int read() 读取单个字符。 “返回值：读取的字符个数”
+                     （2）int read(char[] cbuf) 一次读取一个字符数组。 len=read(chs) “返回值：实际每次读取数组的字符个数”
+
+
+
+二.序列化流与反序列化流：
+
+     01.简要介绍
+
+         1).存储自定义类型对象时，类需要实现 Serializable 接口；标记型接口:打上标记，实现接口允许序列化，不实现则不允许。
+            private static final long serialversionUTD ;创建常量 ：版本号  用于存取核对信息使用；
+       
+         2).不需要实现序列化的时候：
+                   a. 静态内容不能序列化：private static String name;
+                   b. transient 瞬态关键字修饰成员，阻止成员变量序列化：private transient int age; 
+
+
+    02.序列化流：
+      
+        1).构造方法：ObjectOutputStream(OutputStream out) 
+           注意：只能将支持 java.io.Serializable 接口的对象写入流中。
+
+        2).常用方法： void writeObject(Object obj) 
+                      将指定的对象写入 ObjectOutputStream。 
+
+          注意：
+	1.被序列化的对象，必须实现java.io.Serializable(接口)
+	  这个接口中没有任何方法，这种接口叫：标记接口
+	2.静态属性不能被序列化；
+
+    03.反序列化流_输入流_ObjectInputStream
+	1).构造方法：
+		public ObjectInputStream(InputStream in)
+	2).反序列化的方法：
+		public Object readObject():
+   关于"序列号"：
+   1).当我们的类实现Serializable接口时，Eclipse中会出现一个"警告"，建议添加一个属性：序列号；
+   2).Java维护序列化和反序列化的对象是否一致，使用的就是这个"序列号"。
+   3).建议我们自己的类中定义一个"序列号"的字段，用于控制这个对象的版本信息。
+   4).反序列化不执行构造方法；
+
+    04.序列化流_瞬态关键字transient
+	1).如果我们的某些属性不希望被序列化，可以使用这个关键字进行修饰；
+
+
+三.打印流
+
+       打印流
+  	PrintStream 字节打印流
+  	PrintWriter 字符打印流
+    特点
+  	1.只负责数据目的
+  	2.打印流不抛IO异常 但是可能抛出别的异常
+  	3.打印流为其他流添加了功能
+    推荐使用字符打印流
+  	 PrintStream构造方法可以接收 String路径  File对象 OutputStream字节输出流
+    PrintWriter 构造方法可以接收 String路径 File对象  OutputStream字节输出流 Writer字符输出流
+    
+   打印流可以开启自动刷新条件：
+   	1.构造方法中接收的必须是流对象
+    	2.调用的方法 只能是 println printf format 
+    	PrintWriter(OutputStream out, boolean autoFlush)
+    	PrintWriter(Writer out, boolean autoFlush) 
+
+
+
+四.Commons-IO 工具包
+ 
+    13.commons-io工具包_说明_使用步骤
+	1).Apache公司：
+	2).使用第三方jar包的步骤：
+		1).建议：将第三方jar包复制到项目根目录下。(根目录/lib)
+		2).在Eclipse中刚刚复制的第三方jar包上--》右键-->Build Path-->Add to Build Path
+	3).commons-io包中包含了一些对IO操作的一些实用的类和方法
+		
+    14.commons-io工具包_FileUtils工具类
+	1).readFileToString(File file)：读取文件内容，并返回一个String；
+	2).writeStringToFile(File file，String content)：将内容content写入到file中；
+	3).copyDirectoryToDirectory(File srcDir,File destDir);文件夹复制（包含子目录）
+	4).copyFile(File srcFile, File destFile): 文件复制
+
+
+五.Properties类
+
+           java.util.Properties implements Map 
+           特点
+  		1. 实现Map接口 Map的方法都可以使用
+  		2. 没有泛型 键和值都是String
+  		3. 唯一可以直接和IO结合使用的集合类
+       基本方法
+ 		setProperty(String key, String value)  添加元素  // put
+  		String getProperty(String key)	根据键找值   // get(Object key)
+  		Set<String> stringPropertyNames()  获取properties中所有键的set集合  // keySet
+
+
+           Properties集合和IO流结合使用
+                 *  void load(InputStream inStream)  将配置文件中的数据加载进集合
+                 *  void load(Reader reader) 
+          参数 
+   	     InputStream Reader 只要是输入流对象即可
+   
+                 *  void store(OutputStream out, String comments) 将集合中的内容写入到配置文件中
+                 *  void store(Writer writer, String comments) 
+   
+          参数
+                 *  OutputStream    Writer 所有输出流的超类 只要是输出流对象即可
+                 *  String comments 可以给""  为什么修改配置文件解释
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

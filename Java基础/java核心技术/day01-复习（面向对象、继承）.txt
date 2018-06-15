@@ -1,0 +1,96 @@
+   面向对象:是一种思维方式。将功能封装进类中，当需要这个功能时，不去考虑如何完成这个功能，
+   而是考虑哪个类具备这个功能。
+ * 三大特征：封装  继承 多态
+ * 
+ * 封装：隐藏实现细节，提供公共的访问方式。
+ * 
+ * 类与对象
+ * 类：将面向对象这种思维方式体现在代码上。一类事物的抽象，用来描述现实事物。 
+ * 	     用类的成员变量描述现实事物的属性，用类的成员方法来描述现实事物的功能
+ * 对象:根据这一类事物，创建出来的具体实例
+ * 
+ * 匿名对象
+ * 
+ * 匿名对象如果不给变量赋值，只能使用一次。
+ * this:区分成员变量和局部变量.
+ * 		this一般定义在方法中，this代表当前对象的引用。
+ * 		如果定义一个类不创建对象，this没有任何意义。一个类可以创建多个对象，每个对象都有各自的属性值。
+ * 		但是运行方法，运行的都是类中定义的那个方法的逻辑。
+
+
+ * 构造方法
+ * 作用:创建对象时调用的方法，可以给成员变量初始化
+ * 
+ * 格式
+ * public 类名(形式参数){
+ * 
+ * }
+ * 注意：如果没有手动给出任意的构造方法，那么系统会默认提供一个空参数的构造方法。
+ * 	         如果手动给出了任意的构造方法，那么系统都不会提供空参构造了
+ * 	        构造方法可以有多个，多个构造方法是以重载的方式出现的。
+
+
+String类的常用方法汇总
+ 
+         * java.lang.String
+         * 所有字符串的字面值都是字符串的对象 ""
+         * 字符串是常量 一旦创建不可改变 因为不可改变 所以可以共享
+  
+ * 字符串的构造方法
+
+         * String(char[] value)  将字符数组转换为字符串
+         * String(char[] value, int offset, int count)  将字符数组的一部分转换为字符串
+         * String(byte[] bytes)  将字节数组转换为字符串
+         * String(byte[] bytes, int offset, int length) 将字节数组的一部分转换为字符串
+
+ * 字符串的转换功能方法
+ 
+         * char[] toCharArray() 将字符串转换为字符数组
+         * byte[] getBytes() 将字符串转换为字节数组
+
+ * 判断方法
+	 * boolean equals() 判断是否相等 判断字符串内容
+	 * boolean equalsIgnoreCase()  忽略大小写判断是否相等
+	 * boolean startsWith()  判断开头 
+	 * boolean endsWith()   判断结尾
+	 * 
+	 * String toLowerCase()  转小写
+	 * String toUpperCase() 转大写
+
+ * 获取方法
+	 * int length() 获取长度x
+	 * char charAt(int inde)  根据索引找字符
+	 * int indexOf(String str) 根据字符找索引
+	 * 
+	 * String substring(int index) 从索引到结尾  截取
+	 * String substring(int start ,int end)  从开始索引 到结束索引截取 但是 包含开始 不包含结尾
+	 * 
+	 * 去两端空格
+	 * String trim()
+	 * 切割字符串
+	 * String[] split(String regex) 将字符串转换为字符串数组
+
+
+
+
+ 集合类  ArrayList
+
+ * 数组  长度恒定  可以存储任意类型数据
+ * 集合  长度可变  只能存储引用类型 如果想存储基本类型 需要存基本类型相对应的引用类型
+ * 		int --- Integer       char --- Character
+ * 		double ---- Double
+ * 
+ * 数组长度   length属性
+ * 字符串长度  .length()方法
+ * 集合长度  .size()方法
+
+
+   IO:输入输出流
+
+
+ * 字符流 
+
+ * FileReader  字符输入流    绑定数据源   读 read 读单个字符  读字符数组 
+ * FileWriter  字符输出流    绑定数组目的 写  write 写单个字符  写字符数组 字符数组一部分   字符串
+ * BufferedReader  字符输入缓冲流  绑定数据源  读  readLine() 读一行
+ * BufferedWriter  字符输出缓冲流   绑定数组目的 写  newLine() 写换行

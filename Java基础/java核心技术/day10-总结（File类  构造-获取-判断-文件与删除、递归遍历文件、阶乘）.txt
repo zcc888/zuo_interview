@@ -1,0 +1,251 @@
+
+                                             day10   File 类 —— 递归
+
+
+=====================================================================================================================
+
+一、File类
+   1.三种构造方法；
+   2.判断方法；
+   3.文件创建获取及删除方法；
+   4.listFile()方法；
+
+
+二、递归
+   1.递归概述；
+   2.递归打印所有子目录中的文件路径；
+
+----------------------------------------------------------------------------------------------------------------
+
+一、File类
+
+ File类概述
+
+         File文件和目录路径名的抽象表示形式。Java中把文件或者目录（文件夹）都封装成File对象。
+     文件:File 存储数据
+         文件夹:Directory 存储文件  区分文件
+         路径:Path 定位文件或文件夹
+         File类具有平台无关性 
+  
+     File类的静态常量
+ 	 public static final String pathSeparator 与系统有关的路径分隔符//   ; linux中是：
+         public static final String separator 与系统有关的默认名称分隔符// \\ linux中为//
+
+
+   1.三种构造方法；
+
+     uri 统一资源标识符
+         * 	   包含url
+         * 	 mailto:
+         * 	 thrunder:
+         * 	 ed2k:	
+         * url 统一资源定位符    例如：网站链接；
+         *   www.baidu.com  具备全球唯一性
+  
+ * File类的构造方法:  不检验是否真正创建文件，而是指定文件创建的路径；
+         * 		File(String pathname)
+
+                /* public File(String pathname) 
+		 * 创建File对象 传入一个字符串的路径
+		 * 路径 可以是文件名 也可以是文件夹
+		 * File类 不在构造方法中检查路径是否存在
+		 */
+
+ 
+         *      File(String parent, String child) 
+
+                /* File(String parent, String child) 
+		 * 创建File对象  需要传入一个字符串类型的父路径
+		 * 和一个字符串类型的子路径
+
+         *      File(File parent ,String child)
+
+                /* File(File parent ,String child)
+		 *  创建File对象 需要一个File类型的父路径 
+		 *  字符串类型的子路径
+		 */
+
+    绝对路径:	
+         *   	 d:\\work\\abc  唯一性
+
+   2.文件创建删除方法；
+
+File类的创建方法：
+       （1） boolean createNewFile()  创建文件 没有则创建 存在则不创建
+             返回值boolean类型，创建成功为true 创建失败为false，
+             注意：只能创建文件，不能创建文件；创建文件的路径在构造方法中给出。
+       （2）  boolean mkdir()
+		 * 创建文件夹  没有则创建 存在则不创建
+		 * 返回boolean类型
+		 * 成功为true 失败为false
+		 * 注意 只能创建文件夹，不能创建文件
+		 * 创建文件夹的路径在构造方法中给出
+		 * 此方法只能创建单级文件夹
+		 * 如果想创建多级文件夹  
+		 * 推荐使用
+       （3）boolean mkdirs()  创建多级目录：
+
+       （4） boolean delete() 删除文件或文件夹  java的删除不走回收站  删除有风险 操作需谨慎 
+             只能删除单级文件夹 ，不能删除多级文件夹 要想删除 只能从内到外删除
+
+   3.获取方法；
+
+       （1）  String getName() 获取文件或文件夹的名字
+       （2）  String getPath() 获取路径(在构造方法中写的路径)
+       （3）  String getAbsolutePath() 获取绝对路径；
+       （4）  File getAbsoluteFile()  返回此抽象路径名的绝对路径名形式； 
+       （5）  long length（） 获取文件存储数据的字节数
+             文件夹本身没有字节数 不可以获取  只能获取文件的大小
+       （6）  String getParent()  获取父目录的绝对路径；
+
+   4.判断方法；
+
+       （1）  boolean exists()  判断构造方法中的路径是否存在,存在为true 不存在为false
+
+       （2）  boolean isFile() 
+       注意:  如果文件不存在返回false ；如果不是文件返回false ；如果是文件返回true
+       （3）  boolean isDirectory() 判断是否为文件夹。
+
+
+
+   5.listFile()方法；
+
+       （1）   String[] list() 返回一个文件夹下 所有文件的文件名的数组；
+
+       （2）   File[] listFiles() 返回一个文件夹下 所有文件对象的数组
+
+       （3）   static File[] listRoots() 返回当前系统下所有的盘符
+
+文件过滤器
+
+        File[] listFiles(FileFilter filter ) 获取过滤后的File类型的数组
+ 
+            public class MyFileFilter implements FileFilter{
+	@Override
+	public boolean accept(File pathname) {
+		if(pathname.isDirectory()){
+			return false;
+		}
+		//判断是否为.java文件
+		String name=pathname.getName();
+		boolean b=name.toLowerCase().endsWith(".java");
+		return  b;
+
+
+             public static void main(String[] args) {
+		File file=new File("F:\\zuoye\\day1");
+		File[] fileArr=file.listFiles(new MyFileFilter());
+
+
+
+二、递归
+   1.递归概述；
+               递归：方法调用自己的情况
+              public void method(int a){
+  		if(a==1){
+  			return ;
+  		}
+  		a--;
+ 		method(a);
+
+     特点：
+         1.递归必须有一个出口，否则就是死递归
+         2.递归的次数不宜过多，太多会内存溢出
+         3.构造方法不能递归
+
+案例一：递归获取一个文件夹下的所有文件(包含子文件夹下的文件)
+
+            给一个文件夹 获取当前文件夹下的所有文件
+		 * 1.获取src文件夹下所有文件 listFiles
+		 * 2.遍历文件数组 依次获取每个文件
+		 * 		对文件进行判断
+		 * 			如果是文件  直接打印
+		 * 			如果是文件夹 继续获取这个文件下的的所有文件
+
+            private static void getFiles(File file) {
+		//获取src文件夹下所有文件 listFiles
+		File[] fileArr = file.listFiles();
+		//遍历文件数组 依次获取每个文件
+		for (File thisFile : fileArr) {
+			//对文件进行判断
+			//如果是文件  直接打印	
+			if(thisFile.isFile()){
+				System.out.println(thisFile.toString());
+			}else{
+				getFiles(thisFile);
+
+
+   2.递归打印所有子目录中的文件路径；
+
+
+
+
+
+
+扩展：IO的异常处理
+ * 
+ * 1.提升变量的作用域访问  try外定义变量 try内为变量赋值
+ * 2.关闭资源放入finally中 一定要保证流资源关闭
+ * 3.在处理异常时，将编译时异常转换为运行时异常抛出
+ */
+
+              public static void main(String[] args) {
+		FileReader fr=null;
+		FileWriter fw=null;
+		try{
+			fr=new FileReader("F:\\zuoye\\day1\\HelloWorld.java");
+			fw=new FileWriter("a.txt");
+			char[]chs=new char[1024];
+			int len=0;
+			while((len=fr.read(chs))!=-1){
+				fw.write(chs,0,len);
+				fw.flush();
+			}
+		}catch(IOException e){
+			throw new RuntimeException("复制失败，请稍后重试！"+e);
+		}finally{
+			try{
+				if(fw!=null)
+					fw.close();
+			}catch(IOException e1){
+				
+			}finally{
+				try{
+					if(fr!=null)
+						fr.close();
+				}catch(IOException e2){
+					
+				}
+			}
+		}
+		
+		System.out.println("Game Over!");
+		try{
+			method();
+		}catch(IOException e3){
+			e3.printStackTrace();
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

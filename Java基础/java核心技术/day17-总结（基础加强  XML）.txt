@@ -1,0 +1,302 @@
+
+                                   DAY  17     基础加强     XML
+
+============================================================================================
+
+一、XML的概述
+   1.什么是XML；
+   2.XML的作用；
+
+二、XML的语法
+
+   1.文档声明；
+   2.XML文档中的元素结构；
+   3.XML文档中的元素属性；
+   4.文档注释；
+   5.文档中转义字符及CDATA的使用；
+
+三、XML的约束（DTD和Schema约束）
+
+   1.案例：按照已有的DTD编写xml文档；
+   2.DTD语法：
+           a) 文档声明；
+           b) 元素声明；
+           c) 属性声明；
+   3.Schema约束；
+     案例：按照已有的Schema约束编写XML文档；
+           a) Schema较DTD约束的优点；
+           b) 命名空间；
+
+
+四、XML文档的解析
+   1.常见解析方式及优缺点；
+   2.解析原理；
+   3.API使用方法（dom4j方法）
+   4.案例练习分析；
+
+======================================================================================================
+
+一、XML的概述
+
+   1.什么是XML；
+
+       XML全称为Extensible Markup Language，意思是可扩展的标记语言。
+
+   2.XML的作用；
+               （1）存放数据；
+                             <?xml version="1.0" encoding="UTF-8"?>
+                             <persons>
+	                            <person id="p001">
+		                          <name>张三</name>
+	                         </person>
+	                             <person id="p002">
+		                          <name>李四</name>
+	                         </person>
+                             </persons>
+
+               （2）配置文件；
+                             <?xml version="1.0" encoding="UTF-8"?>
+                             <beans>
+	                         <bean className="com.itheima_00_Bean.User">
+		                      <property name="username" value="jack"></property>
+	                         </bean>
+                             </beans>
+
+
+二、XML的语法
+
+   1.文档声明；
+          1.文档声明必须为<?xml开头，以?>结束；
+          2.文档声明必须从文档的0行0列位置开始；
+          3.文档声明只有2个属性：
+	       a)versioin：指定XML文档版本。必须属性，因为我们不会选择1.1，只会选择1.0；
+	       b)encoding：指定当前文档的编码。可选属性，默认值是utf-8；
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+   2.XML文档中的元素结构；
+
+          元素 element
+		<bean></bean>
+		1.   元素是XML文档中最重要的组成部分，
+		2.   普通元素的结构：开始标签、元素体、结束标签组成。例如：<hello>大家好</hello>
+		3.   元素体：元素体可以是元素，也可以是文本，例如：<b><a>你好</a></b>
+		4.   空元素：空元素只有开始标签，而没有结束标签，但元素必须自己闭合，例如：<c/>
+		5.   元素命名：
+		 		a)	区分大小写
+				b)	不能使用空格，不能使用冒号:
+				c)	不建议以XML、xml、Xml开头
+		6.   格式化良好的XML文档，必须只有一个根元素。
+
+   3.XML文档中的元素属性；
+
+         属性  attribute
+		<bean id=”” className=””></bean>
+        1.	属性是元素的一部分，它必须出现在元素的开始标签中
+	2.	属性的定义格式：属性名=属性值，其中属性值必须使用单引或双引
+	3.	一个元素可以有0~N个属性，但一个元素中不能出现同名属性
+	4.	属性名不能使用空格、冒号等特殊字符，且必须以字母开头
+
+         <bean id = "001"  name = 'liuyan' age = "38" > 
+ 
+ 	        <property id = "001"></property>
+
+         </bean>
+
+   4.文档注释；
+
+      XML的注释，以“<!--”开始，以“-->”结束。注释内容会被XML解析器忽略
+
+
+   5.文档中转义字符及CDATA的使用；
+
+          文档中转义字符：
+                         <    &lt;
+	                 >    &gt;
+	                 "    &quot;
+	                 '    &apos;
+	                 &    &amp; 
+
+
+          CDATA区：可以写任意内容 无论写什么都是纯文本
+                   <![CDATA[
+	            任意内容
+                   ]]>
+          在CDATA段中不能包含“]]>”，即CDATA段的结束定界符。
+
+
+三、XML的约束（DTD和Schema约束）
+
+
+（一）在XML技术里，可以编写一个文档来约束一个XML文档的书写规范，这称之为XML约束。
+      常见的xml约束：DTD、Schema。
+
+（二）DTD（Document Type Definition），文档类型定义，用来约束XML文档。
+      规定XML文档中元素的名称，子元素的名称及顺序，元素的属性等。
+
+
+   1.案例：按照已有的DTD编写xml文档；
+           
+     DTD文档：
+     <?xml version="1.0" encoding="UTF-8"?>
+         <!ELEMENT beans (bean*,import*) >
+         <!ELEMENT bean (property*)>
+         <!ELEMENT property (#PCDATA)>
+
+         <!ELEMENT import (#PCDATA)>
+
+
+    按照以上文档编写的XML文档：
+     <?xml version="1.0" encoding="UTF-8"?> 
+     <!DOCTYPE beans SYSTEM "bean.dtd">
+     <beans>
+	<bean className="" id="p01">
+		<property name="" value=""></property>
+	
+	</bean>
+	<bean className="" id="p02">
+		<property name="" value=""></property>
+	
+	</bean>
+	<import resource=""> </import>
+
+     </beans>
+
+   2.DTD语法：
+           a) 文档声明；
+                1.引入DTD文件   每一个DTD文档都有 <!DOCTYPE声明直接复制 粘贴
+	        2.beans：代表xml文件的根元素必须是 beans
+	        3."bean.dtd"  dtd文件的位置
+	        4.根据DTD编写xml
+
+           b) 元素声明；
+                  定义元素语法：<!ELEMENT 元素名     元素描述>
+	          元素名：自定义
+	          元素描述包括：符号和数据类型
+		     常见符号：? * + () | ,
+		     常见类型：#PCDATA 表示内容是文本，不能是子标签
+
+           c) 属性声明；
+                 属性的语法：（attribute）
+	              <!ATTLIST 元素名
+					属性名 属性类型 约束
+					属性名 属性类型 约束
+					...
+	              >
+	元素名：属性必须是给元素添加，所有必须先确定元素名
+	属性名：自定义
+	属性类型：ID、CDATA、枚举…
+		ID : ID类型的属性用来标识元素的唯一性
+		CDATA：文本类型
+		约束：
+		#REQUIRED：说明属性是必须的；required
+		#IMPLIED：说明属性是可选的；implied
+
+
+            <!ATTLIST bean 
+			   id CDATA #REQUIRED
+			   className CDATA #REQUIRED
+            >
+
+            <!ATTLIST property name CDATA #REQUIRED
+				   value CDATA #REQUIRED
+            >
+
+            <!ATTLIST import resource CDATA #REQUIRED>
+
+
+   3.Schema约束；
+     案例：按照已有的Schema约束编写XML文档；
+
+           a) Schema较DTD约束的优点；
+
+              使用schema的常见框架有：Spring等
+
+              本身也是XML文档，但Schema文档的扩展名为xsd，而不是xml。
+                 ①．使用与XML相同的语法；
+
+                 ②．支持多种数据类型；
+
+                 ③．支持用户自定义数据类型；
+
+                 ④．支持名称空间。
+
+           b) 命名空间；
+               1.引入schema约束  复制 粘贴 补结束标签
+	       2.命名空间
+	        xmlns="http://www.w3.org/2001/XMLSchema" 官方文档 默认的命名空间
+	   自定义命名空间 
+		targetNamespace="http://www.itcast.cn/bean"
+		xmlns="http://www.itcast.cn/bean"
+           显示的命名空间
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		
+
+四、XML文档的解析
+   1.常见解析方式及优缺点；
+
+         1.DOM：要求解析器把整个XML文档装载到内存，并解析成一个Document对象。
+            a)	优点：元素与元素之间保留结构关系，故可以进行增删改查操作。
+            b)	缺点：XML文档过大，可能出现内存溢出显现。
+         2.SAX：是一种速度更快，更有效的方法。它逐行扫描文档，一边扫描一边解析。并以事件驱动的方式进行具体解析，每执行一行，都将触发对应的事件。（了解）
+            a)	优点：处理速度快，可以处理大文件
+            b)	缺点：只能读，逐行后将释放资源。
+         3.PULL：Android内置的XML解析方式，类似SAX。（了解）
+
+
+   2.解析原理；
+
+      XML DOM 将整个XML文档加载到内存，生成一个DOM树，并获得一个Document对象，通过Document对象就可以对DOM进行操作。
+      DOM中的核心概念就是节点，在XML文档中的元素、属性、文本等，在DOM中都是节点！
+
+   3.API使用方法（dom4j方法）
+
+     dom4j 必须使用核心类SaxReader加载xml文档获得Document，通过Document对象获得文档的根元素，然后就可以操作了。
+
+         常用API如下：
+            1.SAXReader对象
+  		    a)  read(…) 加载执行xml文档 返回Document类型的对象
+            2.Document对象
+  		    a)  getRootElement() 获得根元素
+            3.Element对象
+  		    a)  elements(…) 获得指定名称的所有子元素。可以不指定名称
+  		    b)  element(…) 获得指定名称第一个子元素。可以不指定名称
+  		    c)  getName() 获得当前元素的元素名
+  		    d)  attributeValue(…) 获得指定属性名的属性值
+  		    e)  elementText(…) 获得指定名称子元素的文本值
+  		    f)  getText() 获得当前元素的文本内容
+
+
+   4.案例练习分析；
+
+      public static void main(String[] args) throws Exception {
+		//创建SAXReader对象
+		SAXReader  sr = new SAXReader();
+		//调用read方法  绑定数据源 返回Document对象
+		Document doc = sr.read("beans.xml");
+		
+		//调用getRootElement()方法获取根元素
+		Element root = doc.getRootElement();
+		
+		//获取跟元素的所有子元素  bean元素
+		List<Element> beans = root.elements();
+		for(Element bean : beans){
+			System.out.println(bean.getName());
+			
+			String id = bean.attributeValue("id");
+			String className = bean.attributeValue("className");
+			System.out.println(id + ".."+ className);
+			
+			//获取bean元素的所有子元素  property
+			List<Element> properties =bean.elements();
+			for(Element property:properties){
+				System.out.println(property.getName());
+				//获取property元素的属性值
+				String name = property.attributeValue("name");
+				String value = property.attributeValue("value");
+				System.out.println(name + ".." + value);
+			}
+
+
+
+
