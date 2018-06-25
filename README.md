@@ -19,3 +19,6 @@
 ## [手撕算法](https://github.com/zcc888/zuo_interview/tree/master/%E6%89%8B%E6%92%95%E7%AE%97%E6%B3%95)
 
 ## [大佬面经](https://www.cnblogs.com/threetop/)
+
+## [其他总结一](https://github.com/Snailclimb/Java-Guide)
+## [其他总结二](https://github.com/CyC2018/Interview-Notebook)

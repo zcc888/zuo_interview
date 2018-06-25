@@ -28,7 +28,9 @@
 
 ##(6)抽象类可以有普通的成员变量，接口中也可以有成员变量，但必须用public static final.抽象类可以有private的成员,abstract 方法必须在abstract类或接口中。
    ![](https://i.imgur.com/S6oCCIw.jpg)
+
 ##(7)Java表达式转型规则由低到高转换：
+
 - 
 -  byte b1=1,b2=2,b3,b6,b8;
 -  final byte b4=4,b5=6,b7;
@@ -49,6 +51,7 @@
 - 语句2正确：b6=b4+b5;b4、b5为final类型，不会自动提升，所以和的类型视左边变量类型而定，即b6可以是任意数值类型；
 - 语句3错误：b8=(b1+b4);虽然b4不会自动提升，但b1仍会自动提升，所以结果需要强转，b8=(byte)(b1+b4);
 - 语句4错误：b7=(b2+b5); 同上。同时注意b7是final修饰，即只可赋值一次，便不可再改变。
+- 
 ##(8)实现接口，就要实现接口的所有方法，相当于重写方法，方法的重写需要满足：三同一大一小（方法名、返回值类型、形参相同；访问权限>=重写前；抛出异常<=重写前）
 
 ##(9)[SpringMVC](https://www.jianshu.com/p/ca5d246761cd)
@@ -73,3 +76,29 @@ Cookie 头标将之返回到服务器。与其它技术比较，Cookie 的一个
 ##(11)Java中的8种基本类型属于原生类，而数组是引用类型，不属于原生类，可以看成是一种对象。
 ![](https://i.imgur.com/wPnWuXM.png)
 ![](https://i.imgur.com/p4ERds9.jpg)
+
+##(12)进制转换（1*n+3）*(1*n+4)=2*n^2+4;//    n=-1或n=8;  其中n=8成立
+![](https://i.imgur.com/oktY4hD.jpg)
+
+##(13)instance是java的二元运算符，用来判断他左边的对象是否为右面类（接口，抽象类，父类）的实例
+
+##(14)赋值运算是有返回值的，赋了什么值，就返回什么值
+![](https://i.imgur.com/ncfGNpw.jpg)
+##(15)接口和抽象类的区别
+![](https://i.imgur.com/DVxEtlC.jpg)
+
+##(16)java ++特性
+![](https://i.imgur.com/57vtlGl.jpg)
+ count = count++  原理是 temp = count； count = count+1 ； count = temp；   因此count始终是0 这仅限于java ,c,c++是不一样的
+
+##(17)[final ,finally等](https://www.nowcoder.com/test/question/done?tid=16379875&qid=14305#summary)
+![](https://i.imgur.com/qW2Nkxj.jpg)
+
+##(18)[经典题型](https://www.nowcoder.com/test/question/done?tid=16379875&qid=55361#summary)
+
+##(19)计算弧度值
+ ![](https://i.imgur.com/810SQY9.jpg)
+##(20)[索引的运用](https://www.nowcoder.com/questionTerminal/7d2af51194e14e708c71c855f5f28a36)
+![](https://i.imgur.com/x12Vp5C.jpg)
+
+##(21)[语句声明](https://www.nowcoder.com/test/question/done?tid=16380309&qid=56003#summary)
