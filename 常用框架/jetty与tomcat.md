@@ -1,2 +1,51 @@
-# [jetty](https://www.cnblogs.com/crazyacking/p/5734849.html)与tomcat 应用服务器
+# [一、jetty](https://www.cnblogs.com/crazyacking/p/5734849.html)与tomcat 应用服务器
 
+
+# 二、[Servlet+Tomcat](https://segmentfault.com/a/1190000013119518)
+- Tomcat的缺省端口是多少，怎么修改
+- 
+- Tomcat 有哪几种Connector 运行模式(优化)？
+- 
+- Tomcat有几种部署方式
+- 
+- Servlet生命周期
+- 
+- get方式和post方式有何区别
+- 
+- doGet与doPost方法的两个参数是什么
+- 
+- 获取页面的元素的值有几种方式，分别说一下
+- 
+- request.getAttribute()和request.getParameter()区别
+- 
+- forward和redirect的区别
+- 
+- tomcat容器是如何创建servlet类实例？用到了什么原理
+- 
+- 什么是cookie？Session和cookie有什么区别？
+- 
+- Servlet安全性问题
+-
+# 三、[jsp](https://segmentfault.com/a/1190000013185611)
+- jsp静态包含和动态包含的区别
+- 
+- jsp有哪些内置对象?作用分别是什么?
+- 
+- jsp和servlet的区别、共同点、各自应用的范围？
+- 
+- 属性作用域范围
+- 
+- 写出5种JSTL常用标签
+- 
+- 写一个自定义标签要继承什么类
+- 
+- JSP是如何被执行的？执行效率比SERVLET低吗？
+- 
+- 如何避免jsp页面自动生成session对象？
+- 
+- jsp的缺点？
+- 
+- 说出Servlet和CGI的区别？
+- 
+- 简述JSP的设计模式。
+- 

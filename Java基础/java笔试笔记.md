@@ -102,3 +102,10 @@ Cookie 头标将之返回到服务器。与其它技术比较，Cookie 的一个
 ![](https://i.imgur.com/x12Vp5C.jpg)
 
 ##(21)[语句声明](https://www.nowcoder.com/test/question/done?tid=16380309&qid=56003#summary)
+
+##(22)字符串的编码
+![](https://i.imgur.com/O4PEu87.jpg)
+##(23)字符串操作
+![](https://i.imgur.com/NR2sLXW.jpg)
+##(24)运算符的优先级
+![](https://i.imgur.com/yNlrp1J.jpg)
